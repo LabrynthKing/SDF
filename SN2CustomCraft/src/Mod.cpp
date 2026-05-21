@@ -3,6 +3,8 @@
 #include <DynamicOutput/Output.hpp>
 #include <Mod/CppUserModBase.hpp>
 
+#include "registering/RecipeFactory.hpp"
+
 using namespace RC;
 using namespace Unreal;
 
@@ -21,6 +23,11 @@ public:
     auto on_unreal_init() -> void override
     {
         Hooks::RegisterHooks();
+
+        RecipeFactory recipe("CustomRecipe", "Limos Recipe", "This is a custom recipe :)");
+        recipe.addIngredient("PowerCell");
+        recipe.addOutput("CopperIngot");
+        recipe.registerRecipe();
     }
 };
 

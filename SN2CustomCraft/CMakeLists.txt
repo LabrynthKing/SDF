@@ -7,6 +7,8 @@ add_library(${TARGET} SHARED
         src/Mod.cpp
         src/registering/Hooks.cpp
         src/registering/Hooks.hpp
+        src/registering/RecipeFactory.cpp
+        src/registering/RecipeFactory.hpp
 )
 
 target_link_libraries(${TARGET} PUBLIC UE4SS)
