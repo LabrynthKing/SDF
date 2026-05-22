@@ -1,14 +1,16 @@
 #include "registering/Hooks.hpp"
+#include "registering/RecipeFactory.hpp"
 
 #include <DynamicOutput/Output.hpp>
 #include <Mod/CppUserModBase.hpp>
 
-#include "registering/RecipeFactory.hpp"
+#include "util/Log.hpp"
 
 using namespace RC;
 using namespace Unreal;
 
 class SN2CustomCraft : public CppUserModBase {
+    bool scanning = true;
 public:
     SN2CustomCraft() {
         ModVersion = STR("0.1");
@@ -16,17 +18,27 @@ public:
         ModAuthors = STR("Limo");
         ModDescription = STR("A utility mod that allows anyone to modify the games crafting recipes");
 
-        Output::send<LogLevel::Verbose>(STR("[SN2CustomCraft]: Initialized\n"));
+        Log::Verbose("Initialized");
     }
     ~SN2CustomCraft() override = default;
 
-    auto on_unreal_init() -> void override
-    {
+    auto on_update() -> void override {
+        if (!scanning)
+            return;
+        if (const auto world = SDK::UWorld::GetWorld()) {
+            if (world->GetName().contains("ClientLobby")) {
+                scanning = false;
+                Startup();
+            }
+        }
+    }
+
+    static void Startup() {
         Hooks::RegisterHooks();
 
         RecipeFactory recipe("CustomRecipe", "Limos Recipe", "This is a custom recipe :)");
-        recipe.addIngredient("PowerCell");
-        recipe.addOutput("CopperIngot");
+        recipe.addIngredient("PowerCell", 1);
+        recipe.addOutput("CopperIngot", 2);
         recipe.registerRecipe();
     }
 };

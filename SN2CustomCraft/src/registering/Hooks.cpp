@@ -4,24 +4,23 @@
 
 #include "Hooks.hpp"
 
-#include "RecipeFactory.hpp"
-#include "UnrealDef.hpp"
-#include "UObjectGlobals.hpp"
-#include "DynamicOutput/Output.hpp"
-#include "polyhook2/Exceptions/AVehHook.hpp"
+#include <memory>
 
-using namespace RC;
-using namespace Unreal;
+#include "util/Log.hpp"
+#include "RecipeFactory.hpp"
+#include "polyhook2/Exceptions/AVehHook.hpp"
+#include "SDK/Subnautica2_classes.hpp"
 
 getRecipeT Hooks::originalGetRecipes = nullptr;
 
 std::unique_ptr<PLH::Detour> Hooks::getRecipesHook = nullptr;
 
-Unreal::TArray<SDK::UUWECraftingRecipe*> Hooks::GetRecipesHook() {
+TArray<UUWECraftingRecipe*> Hooks::GetRecipesHook() {
     auto recipes = originalGetRecipes();
-    for (const SDK::UUWECraftingRecipe* recipe : RecipeFactory::getAllRegisteredRecipes()) {
-        RC::Output::send<LogLevel::Verbose>(L"[SN2CustomCraft]: Adding recipe\n");
-        recipes.Push(const_cast<SDK::UUWECraftingRecipe*>(recipe));
+        Log::Verbose("Adding recipes");
+    for (const UUWECraftingRecipe* recipe : RecipeFactory::getAllRegisteredRecipes()) {
+        Log::Verbose("Adding recipe");
+        recipes.Add(const_cast<UUWECraftingRecipe*>(recipe));
     }
     return recipes;
 }
@@ -42,24 +41,22 @@ uintptr_t Hooks::ScanCall(uintptr_t address, int ordinal) {
 }
 
 void Hooks::RegisterHooks() {
-    RC::Output::send<LogLevel::Verbose>(L"[SN2CustomCraft]: Hooking recipe registry\n");
+    Log::Verbose("Hooking recipe registry");
 
-    const auto recipeFunc = UObjectGlobals::FindObject<UFunction>(nullptr, L"/Script/Subnautica2.SN2AssetRegistry:GetAllCraftingRecipes");
-    const auto funcPtr = reinterpret_cast<uintptr_t>(*recipeFunc->GetFuncPtr());
+    const auto recipeFunc = USN2AssetRegistry::StaticClass()->GetFunction("SN2AssetRegistry", "GetAllCraftingRecipes");
+    const auto funcPtr = reinterpret_cast<uintptr_t>(*recipeFunc->ExecFunction);
     const auto internalPtr = ScanCall(funcPtr, 1);
 
-    wchar_t buf[256];
-    swprintf(buf,256,L"[SN2CustomCraft]: Found recipe registry getter at %p\n", (void*)internalPtr);
-    RC::Output::send<LogLevel::Verbose>(buf);
+    Log::Verbose("Found recipe registry getter at {:p}", reinterpret_cast<void*>(internalPtr));
 
-    getRecipesHook.reset(new PLH::x64Detour(
+    getRecipesHook = std::make_unique<PLH::x64Detour>(
         internalPtr,
         reinterpret_cast<uint64_t>(&GetRecipesHook),
         reinterpret_cast<uint64_t*>(&originalGetRecipes)
-    ));
+    );
 
-    if (!getRecipesHook->hook())
-        RC::Output::send<LogLevel::Error>(L"[SN2CustomCraft]: Failed to hook recipe registry!\n");
+    if (getRecipesHook->hook())
+        Log::Verbose("Successfully hooked recipe registry");
     else
-        RC::Output::send<LogLevel::Verbose>(L"[SN2CustomCraft]: Hook successful\n");
+        Log::Error("Failed to hook recipe registry!");
 }
