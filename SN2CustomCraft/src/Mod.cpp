@@ -40,12 +40,13 @@ public:
         CategoryFactory upperCategory("UpperCategory", "Upper Category", "This is an upper category", ECrafterType::Fabricator);
         upperCategory.setIconFromItem("MetalSalvage");
         const auto upperCatPtr = upperCategory.registerCategory();
+        upperCatPtr->OrderingIndex = 50;
 
-        CategoryFactory category("CustomCategory", "Custom Category", "This is a custom category :)", ECrafterType::Fabricator);
-        category.setParent("Sustenance");
+        CategoryFactory category("CustomCategory", "Custom Category", "This is a custom category :)", ECrafterType::ModificationStation);
+        //category.setParent(upperCatPtr);
+        category.setParent("ToolUpgrades");
         category.setIconFromItem("CopperIngot");
         const auto catPtr = category.registerCategory();
-        //catPtr->OrderingIndex = 50;
 
         RecipeFactory recipe("CustomRecipe", "Copper Ingot", "This is a custom test recipe :)");
         recipe.setIconFromItem("CopperIngot");

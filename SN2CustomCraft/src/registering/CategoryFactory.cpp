@@ -28,6 +28,13 @@ CategoryFactory::CategoryFactory(std::string categoryId, std::string categoryNam
             break;
         case ECrafterType::ModificationStation:
             setParent("ModificationStation");
+            break;
+        case ECrafterType::VehicleFabricator:
+            setParent("VehicleBay_Category");
+            break;
+        case ECrafterType::BuilderTool:
+            setParent("BuilderToolCategory");
+            break;
         default:
             Log::Warning("Crafter type used by {} is currently unsupported!", categoryId);
     }
