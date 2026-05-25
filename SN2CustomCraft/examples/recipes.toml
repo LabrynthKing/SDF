@@ -9,10 +9,22 @@ icon = "ITEM CookedBluemoon" # This will use the thumbnail from the given item
 crafting_time = 5.0 # Floating point crafting time in seconds
 
 [[recipe.ingredients]]
-CopperIngot = 2
+Titanium = 2
 
 [[recipe.outputs]]
 CookedBluemoon = 6
+
+[[recipe.unlocking_rule]]
+set_id = "PickupRuleSet"
+pickup_items = [
+    "Titanium"
+]
+
+[[recipe.unlocking_rule]]
+set_id = "ScanDataSet"
+scan_data = [
+    "Titanium"
+]
 
 
 [[recipe]]

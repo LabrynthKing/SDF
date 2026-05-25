@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <map>
 #include <vector>
 
 #include "SDK/UWECrafting_classes.hpp"
 #include "SDK/UWEInventory_classes.hpp"
+#include "SDK/UWEScanner_classes.hpp"
 
 using namespace SDK;
 
@@ -21,10 +23,12 @@ class RecipeFactory {
 
     std::vector<FCraftingRecipeRequirement> ingredients{};
     std::vector<FCraftingRecipeOutput> outputs{};
+    std::map<std::string, std::vector<FUWERecipeUnlockRuleEntry>> unlockingRules{};
     float craftingTime = 2.0f;
 
     static UUWEItemType *searchItem(const std::string &itemId);
     static UUWECraftingRecipeCategory *searchRecipeCategory(const std::string &categoryId);
+    static UUWEScanData *searchScanData(const std::string &scanId);
 
     friend class CategoryFactory;
 
@@ -43,6 +47,14 @@ public:
 
     bool addOutput(const std::string &itemId, int32_t amount);
     bool addOutput(UUWEItemType *item, int32_t amount);
+
+    bool addUnlockingRequirementPickup(const std::string &ruleSet, const std::string &itemId);
+    bool addUnlockingRequirementPickup(const std::string &ruleSet, UUWEItemType *item);
+
+    bool addUnlockingRequirementScanData(const std::string &ruleSet, const std::string &dataId);
+    bool addUnlockingRequirementScanData(const std::string &ruleSet, UUWEScanData* data);
+
+    bool addUnlockingRequirement(const std::string &ruleSet, FUWERecipeUnlockRuleEntry entry);
 
     void setCraftingTime(float time);
 

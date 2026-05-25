@@ -94,6 +94,52 @@ void RecipeParser::parseFile(std::string file, const toml::table &table) {
     } else
         Log::Warning("Recipe {} has no outputs", recipeId);
 
+    if (table.contains("unlocking_rule") && table["unlocking_rule"].is_array() && table["unlocking_rule"].as_array()->size() > 0) {
+        for (const auto& unlockingRuleTableNode : *table["unlocking_rule"].as_array()) {
+            if (!unlockingRuleTableNode.is_table()) {
+                Log::Warning("Recipe {} has malformed entry for unlocking rules", recipeId);
+                return;
+            }
+            const auto unlockingRuleTable = unlockingRuleTableNode.as_table();
+            if (!unlockingRuleTable->get("set_id")->is_string()) {
+                Log::Warning("Recipe {} is missing set_id for unlocking rule entry", recipeId);
+                return;
+            }
+
+            const auto ruleSetId = unlockingRuleTable->get("set_id")->as_string()->get();
+            auto anyRulePresent = false;
+
+            if (unlockingRuleTable->contains("pickup_items") && unlockingRuleTable->get("pickup_items")->is_array()) {
+                for (const auto& pickupRule : *unlockingRuleTable->get("pickup_items")->as_array()) {
+                    if (!pickupRule.is_string()) {
+                        Log::Warning("Recipe {} has malformed item pickup rule in rule set {}", recipeId, ruleSetId);
+                        return;
+                    }
+                    if (!factory.addUnlockingRequirementPickup(ruleSetId, pickupRule.as_string()->get()))
+                        Log::Warning("Failed to add item pickup rule to rule set {} of recipe {}", ruleSetId, recipeId);
+                    else
+                        anyRulePresent = true;
+                }
+            }
+
+            if (unlockingRuleTable->contains("scan_data") && unlockingRuleTable->get("scan_data")->is_array()) {
+                for (const auto& scanDataRule : *unlockingRuleTable->get("scan_data")->as_array()) {
+                    if (!scanDataRule.is_string()) {
+                        Log::Warning("Recipe {} has malformed scan data rule in rule set {}", recipeId, ruleSetId);
+                        return;
+                    }
+                    if (!factory.addUnlockingRequirementScanData(ruleSetId, scanDataRule.as_string()->get()))
+                        Log::Warning("Failed to add scan data rule to rule set {} of recipe {}", ruleSetId, recipeId);
+                    else
+                        anyRulePresent = true;
+                }
+            }
+
+            if (!anyRulePresent)
+                Log::Warning("Recipe {} has no unlocking rules in rule set {}", recipeId, ruleSetId);
+        }
+    }
+
     if (table.contains("crafting_time") && table["crafting_time"].is_number()) {
         const auto time = static_cast<float>(table["crafting_time"].as_floating_point()->get());
         factory.setCraftingTime(time);

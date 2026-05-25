@@ -20,10 +20,16 @@ UUWEItemType *RecipeFactory::searchItem(const std::string &itemId) {
     return reinterpret_cast<UUWEItemType*>(item);
 }
 
-UUWECraftingRecipeCategory * RecipeFactory::searchRecipeCategory(const std::string &categoryId) {
+UUWECraftingRecipeCategory *RecipeFactory::searchRecipeCategory(const std::string &categoryId) {
     const std::string trueExpr = "DA_" + categoryId;
     const auto item = UObjectGlobals::FindObject(L"UWECraftingRecipeCategory", UtfN::StringToWString(trueExpr).c_str());
     return reinterpret_cast<UUWECraftingRecipeCategory*>(item);
+}
+
+UUWEScanData *RecipeFactory::searchScanData(const std::string &scanId) {
+    const std::string trueExpr = "DA_" + scanId + "_ScanData";
+    const auto item = UObjectGlobals::FindObject(L"UWEScanData", UtfN::StringToWString(trueExpr).c_str());
+    return reinterpret_cast<UUWEScanData*>(item);
 }
 
 RecipeFactory::RecipeFactory(std::string recipeId, std::string recipeName, std::string recipeDescription)
@@ -91,6 +97,45 @@ bool RecipeFactory::addOutput(UUWEItemType *item, const int32_t amount) {
     return true;
 }
 
+bool RecipeFactory::addUnlockingRequirementPickup(const std::string &ruleSet, const std::string &itemId) {
+    return addUnlockingRequirementPickup(ruleSet, searchItem(itemId));
+}
+
+bool RecipeFactory::addUnlockingRequirementPickup(const std::string &ruleSet, UUWEItemType *item) {
+    if (item == nullptr)
+        return false;
+    return addUnlockingRequirement(ruleSet, FUWERecipeUnlockRuleEntry {
+        .EventType = ERecipeEventTypes::OnPickup,
+        .RequirementScope = ERequirementScope::PlayerSpecific,
+        .RequiredCount = 1,
+        .EventAsset = item
+    });
+}
+
+bool RecipeFactory::addUnlockingRequirementScanData(const std::string &ruleSet, const std::string &dataId) {
+    return addUnlockingRequirementScanData(ruleSet, searchScanData(dataId));
+}
+
+bool RecipeFactory::addUnlockingRequirementScanData(const std::string &ruleSet, UUWEScanData *data) {
+    if (data == nullptr)
+        return false;
+    return addUnlockingRequirement(ruleSet, FUWERecipeUnlockRuleEntry {
+        .EventType = ERecipeEventTypes::OnFullScan,
+        .RequirementScope = ERequirementScope::PlayerSpecific,
+        .RequiredCount = 1,
+        .EventAsset = data
+    });
+}
+
+bool RecipeFactory::addUnlockingRequirement(const std::string &ruleSet, FUWERecipeUnlockRuleEntry entry) {
+    if (ruleSet.empty())
+        return false;
+    if (!unlockingRules.contains(ruleSet))
+        unlockingRules.emplace(ruleSet, std::vector<FUWERecipeUnlockRuleEntry>());
+    unlockingRules[ruleSet].emplace_back(entry);
+    return true;
+}
+
 void RecipeFactory::setCraftingTime(const float time) {
     craftingTime = time;
 }
@@ -109,20 +154,39 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
 
     recipe->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeName).c_str());
     recipe->Description = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeDescription).c_str());
+
     recipe->Thumbnail = recipeTexture;
     recipe->Category = recipeCategory == nullptr ? base->Category : static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipeCategory));
+    recipe->CraftingTime = craftingTime;
 
     const auto requirements = reinterpret_cast<Unreal::TArray<FCraftingRecipeRequirement>*>(&recipe->Requirements);
+    requirements->ResizeTo(requirements->Num() + static_cast<int32_t>(ingredients.size()));
     for (const auto& ingredient: ingredients) {
         requirements->Add(ingredient);
     }
 
     const auto output = reinterpret_cast<Unreal::TArray<FCraftingRecipeOutput>*>(&recipe->Output);
+    output->ResizeTo(output->Num() + static_cast<int32_t>(outputs.size()));
     for (const auto& out : outputs) {
         output->Add(out);
     }
 
-    recipe->CraftingTime = craftingTime;
+    const auto rules = reinterpret_cast<Unreal::TArray<FUWERecipeUnlockRules>*>(&recipe->UpdatedUnlockingRequirements);
+    rules->ResizeTo(rules->Num() + static_cast<int32_t>(unlockingRules.size()));
+    recipe->DefaultRecipeState = ERecipeState::Unlocked;
+    for (const auto&[first, second]: unlockingRules) {
+        auto rule = FUWERecipeUnlockRules {
+            .RuleName = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(first).c_str()),
+            .Entries = UC::TArray<FUWERecipeUnlockRuleEntry>(),
+        };
+        const auto entries = reinterpret_cast<Unreal::TArray<FUWERecipeUnlockRuleEntry>*>(&rule.Entries);
+        entries->ResizeTo(static_cast<int32_t>(second.size()));
+        for (const auto& condition : second) {
+            entries->Add(condition);
+        }
+        rules->Add(rule);
+        recipe->DefaultRecipeState = ERecipeState::Locked;
+    }
 
     registeredRecipes.push_back(recipe);
     Log::Verbose("Recipe registered: {}", recipeId);
