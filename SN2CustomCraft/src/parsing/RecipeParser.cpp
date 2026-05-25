@@ -10,34 +10,36 @@
 
 std::map<std::string, UUWECraftingRecipe*> RecipeParser::recipies{};
 
-void RecipeParser::parseFile(std::string file, const toml::table &table) {
+void RecipeParser::parseFile(std::string file, const toml::table &table, bool modifyMode) {
     if (!table.contains("id") || !table["id"].is_string()) {
         Log::Warning("File {} has a recipe without an id", file);
         return;
     }
     const auto recipeId = table["id"].as_string()->get();
 
-    if (!table.contains("name") || !table["name"].is_string()) {
+    if (!modifyMode && (!table.contains("name") || !table["name"].is_string())) {
         Log::Warning("Recipe {} is missing a name", recipeId);
         return;
     }
-    const auto recipeName = table["name"].as_string()->get();
+    const auto recipeName = modifyMode ? "" : table["name"].as_string()->get();
 
-    if (!table.contains("description") || !table["description"].is_string()) {
+    if (!modifyMode && (!table.contains("description") || !table["description"].is_string())) {
         Log::Warning("Recipe {} is missing a description", recipeId);
         return;
     }
-    const auto recipeDescription = table["description"].as_string()->get();
+    const auto recipeDescription = modifyMode ? "" : table["description"].as_string()->get();
 
-    if (!table.contains("category") || !table["category"].is_string()) {
+    if (!modifyMode && (!table.contains("category") || !table["category"].is_string())) {
         Log::Warning("Recipe {} is missing a category", recipeId);
     }
 
-    RecipeFactory factory(recipeId, recipeName, recipeDescription);
+    RecipeFactory factory = modifyMode ? RecipeFactory(recipeId) : RecipeFactory(recipeId, recipeName, recipeDescription);
 
-    if (const auto parentCategory = table["category"].as_string()->get(); !factory.setCategory(parentCategory)) {
-        Log::Warning("Recipe {} has invalid category '{}'", recipeId, parentCategory);
-        return;
+    if (!modifyMode || table.contains("category")) {
+        if (const auto parentCategory = table["category"].as_string()->get(); !factory.setCategory(parentCategory)) {
+            Log::Warning("Recipe {} has invalid category '{}'", recipeId, parentCategory);
+            return;
+        }
     }
 
     if (table.contains("icon") && table["icon"].is_string()) {
@@ -70,7 +72,7 @@ void RecipeParser::parseFile(std::string file, const toml::table &table) {
                     Log::Warning("Failed to add ingredient {} to recipe {}", first.str(), recipeId);
             }
         }
-    } else
+    } else if (!modifyMode)
         Log::Warning("Recipe {} has no ingredients", recipeId);
 
     if (table.contains("outputs") && table["outputs"].is_array() && table["outputs"].as_array()->size() > 0) {
@@ -89,7 +91,7 @@ void RecipeParser::parseFile(std::string file, const toml::table &table) {
                     Log::Warning("Failed to add output {} to recipe {}", first.str(), recipeId);
             }
         }
-    } else
+    } else if (!modifyMode)
         Log::Warning("Recipe {} has no outputs", recipeId);
 
     if (table.contains("unlocking_rule") && table["unlocking_rule"].is_array() && table["unlocking_rule"].as_array()->size() > 0) {
@@ -141,33 +143,78 @@ void RecipeParser::parseFile(std::string file, const toml::table &table) {
     if (table.contains("crafting_time") && table["crafting_time"].is_number()) {
         const auto time = static_cast<float>(table["crafting_time"].as_floating_point()->get());
         factory.setCraftingTime(time);
-    } else
+    } else if (!modifyMode)
         Log::Warning("Recipe {} has no crafting time", recipeId);
 
     if (table.contains("available_in_lifepod") && table["available_in_lifepod"].is_boolean()) {
-        if (table["available_in_lifepod"].as_boolean()->get())
-            factory.makeAvailableInLifePod();
+        factory.setAvailableInLifepod(table["available_in_lifepod"].as_boolean()->get());
+    }
+
+    if (table.contains("remove_unlocking_rules") && table["remove_unlocking_rules"].is_boolean() && table["remove_unlocking_rules"].as_boolean()->get()) {
+        factory.modifyRemoveRequirements();
     }
 
     if (const auto result = factory.registerRecipe(); result == nullptr)
-        Log::Warning("Recipe {} failed to register for an unknown reason", recipeId);
+        Log::Warning("Recipe {} failed to {} for an unknown reason", modifyMode ? "modify" : "register", recipeId);
     else
         recipies.insert(std::make_pair(recipeId, result));
 }
 
 void RecipeParser::ParseRecipes() {
     for (const auto&[path, toml] : FileTraversal::recipeTables) {
-        if (!toml["recipe"].is_array()) {
-            Log::Warning("Malformed recipe file {}", path);
-            return;
-        }
-
-        for (const auto& recipe : *toml["recipe"].as_array()) {
-            if (!recipe.is_table()) {
+        if (toml.contains("recipe")) {
+            if (!toml["recipe"].is_array()) {
                 Log::Warning("Malformed recipe file {}", path);
                 return;
             }
-            parseFile(path, *recipe.as_table());
+
+            for (const auto& recipe : *toml["recipe"].as_array()) {
+                if (!recipe.is_table()) {
+                    Log::Warning("Malformed recipe file {}", path);
+                    return;
+                }
+                parseFile(path, *recipe.as_table(), false);
+            }
+        }
+
+        if (toml.contains("recipe_modify")) {
+            if (!toml["recipe_modify"].is_array()) {
+                Log::Warning("Malformed recipe file {}", path);
+                return;
+            }
+
+            for (const auto& recipe : *toml["recipe_modify"].as_array()) {
+                if (!recipe.is_table()) {
+                    Log::Warning("Malformed recipe file {}", path);
+                    return;
+                }
+                parseFile(path, *recipe.as_table(), true);
+            }
+        }
+
+        if (toml.contains("recipe_delete")) {
+            if (!toml["recipe_delete"].is_array()) {
+                Log::Warning("Malformed recipe file {}", path);
+                return;
+            }
+
+            for (const auto& recipe : *toml["recipe_delete"].as_array()) {
+                if (!recipe.is_table()) {
+                    Log::Warning("Malformed recipe file {}", path);
+                    return;
+                }
+                const auto table = *recipe.as_table();
+
+                if (!table.contains("id") || !table["id"].is_string()) {
+                    Log::Warning("File {} has a recipe_delete without an id", path);
+                    return;
+                }
+                const auto recipeId = table["id"].as_string()->get();
+
+                RecipeFactory factory(recipeId);
+                factory.setCategory("Fabricator");
+                const auto _ = factory.registerRecipe();
+            }
         }
     }
 }

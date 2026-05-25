@@ -23,6 +23,12 @@ UUWEItemType *RecipeFactory::searchItem(const std::string &itemId) {
     return reinterpret_cast<UUWEItemType*>(item);
 }
 
+UUWECraftingRecipe *RecipeFactory::searchRecipe(const std::string &recipeId) {
+    const std::string trueExpr = "DA_" + recipeId + "Recipe";
+    const auto item = UObjectGlobals::FindObject(L"UWECraftingRecipe", UtfN::StringToWString(trueExpr).c_str());
+    return reinterpret_cast<UUWECraftingRecipe*>(item);
+}
+
 UUWECraftingRecipeCategory *RecipeFactory::searchRecipeCategory(const std::string &categoryId) {
     const std::string trueExpr = "DA_" + categoryId;
     const auto item = UObjectGlobals::FindObject(L"UWECraftingRecipeCategory", UtfN::StringToWString(trueExpr).c_str());
@@ -47,6 +53,12 @@ RecipeFactory::RecipeFactory(std::string recipeId, std::string recipeName, std::
 
     const auto defaultTex = reinterpret_cast<UTexture2D*>(UObjectGlobals::FindObject(L"Texture2D", L"T_DefaultImage"));
     setIcon(defaultTex);
+}
+
+RecipeFactory::RecipeFactory(std::string recipeId)
+    : recipeId(std::move(recipeId)), recipeName(""), recipeDescription(""), recipeTexture() {
+    modifyMode = true;
+    craftingTime = -1;
 }
 
 bool RecipeFactory::setCategory(const std::string &categoryId) {
@@ -146,48 +158,67 @@ bool RecipeFactory::addUnlockingRequirement(const std::string &ruleSet, FUWEReci
     return true;
 }
 
+void RecipeFactory::modifyRemoveRequirements() {
+    removeRequirementsModify = true;
+}
+
 void RecipeFactory::setCraftingTime(const float time) {
     craftingTime = time;
 }
 
-void RecipeFactory::makeAvailableInLifePod() {
-    availableInLifePod = true;
+void RecipeFactory::setAvailableInLifepod(const bool available) {
+    availableInLifePod = available;
+    availableInLifePodModify = true;
 }
 
 UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
-    const auto base = reinterpret_cast<UUWECraftingRecipe*>(UObjectGlobals::FindObject(L"UWECraftingRecipe", L"DA_MetalSalvageRecipe"));
+    const auto base = searchRecipe("MetalSalvage");
     if (base == nullptr)
         return nullptr;
 
-    const auto recipe = static_cast<UUWECraftingRecipe*>(UGameplayStatics::SpawnObject(UUWECraftingRecipe::StaticClass(), base->Outer));
+    const auto recipe = modifyMode ? searchRecipe(recipeId) : static_cast<UUWECraftingRecipe*>(UGameplayStatics::SpawnObject(UUWECraftingRecipe::StaticClass(), base->Outer));
     if (recipe == nullptr)
         return nullptr;
 
-    recipe->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}_CustomCraftRecipe", recipeId)).c_str());
-    recipe->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
+    if (!modifyMode) {
+        recipe->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}_CustomCraftRecipe", recipeId)).c_str());
+        recipe->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
 
-    recipe->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeName).c_str());
-    recipe->Description = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeDescription).c_str());
+        recipe->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeName).c_str());
+        recipe->Description = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeDescription).c_str());
+        recipe->Thumbnail = recipeTexture;
+    }
 
-    recipe->Thumbnail = recipeTexture;
-    recipe->Category = recipeCategory == nullptr ? base->Category : static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipeCategory));
-    recipe->CraftingTime = craftingTime;
+    if (!modifyMode || recipeCategory != nullptr)
+        recipe->Category = recipeCategory == nullptr ? base->Category : static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipeCategory));
+    if (!modifyMode || craftingTime != -1)
+        recipe->CraftingTime = craftingTime;
 
     const auto requirements = reinterpret_cast<Unreal::TArray<FCraftingRecipeRequirement>*>(&recipe->Requirements);
+    if (modifyMode && ingredients.size() > 0)
+        requirements->SetNum(0, EAllowShrinking::Yes);
+
     requirements->ResizeTo(requirements->Num() + static_cast<int32_t>(ingredients.size()));
     for (const auto& ingredient: ingredients) {
         requirements->Add(ingredient);
     }
 
     const auto output = reinterpret_cast<Unreal::TArray<FCraftingRecipeOutput>*>(&recipe->Output);
+    if (modifyMode && outputs.size() > 0)
+        output->SetNum(0, EAllowShrinking::Yes);
+
     output->ResizeTo(output->Num() + static_cast<int32_t>(outputs.size()));
     for (const auto& out : outputs) {
         output->Add(out);
     }
 
     const auto rules = reinterpret_cast<Unreal::TArray<FUWERecipeUnlockRules>*>(&recipe->UpdatedUnlockingRequirements);
+    if (modifyMode && (!unlockingRules.empty() ||removeRequirementsModify)) {
+        rules->SetNum(0, EAllowShrinking::Yes);
+        recipe->DefaultRecipeState = ERecipeState::Unlocked;
+    }
+
     rules->ResizeTo(rules->Num() + static_cast<int32_t>(unlockingRules.size()));
-    recipe->DefaultRecipeState = ERecipeState::Unlocked;
     for (const auto&[first, second]: unlockingRules) {
         auto rule = FUWERecipeUnlockRules {
             .RuleName = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(first).c_str()),
@@ -203,20 +234,29 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     }
 
     registeredRecipes.push_back(recipe);
-    if (availableInLifePod) {
-        registeredRecipesLifePod.push_back(recipe);
-
+    if (availableInLifePodModify) {
         const auto staticBrokenFabricator = UObjectGlobals::StaticFindObject(nullptr, nullptr, L"/Game/Blueprints/Crafting/BP_Fabricator_Lifepod.Default__BP_Fabricator_Lifepod_C:Crafter");
         const auto lifepodCrafter = reinterpret_cast<UUWECrafterComponent*>(staticBrokenFabricator);
+
         if (lifepodCrafter == nullptr) {
             Log::Warning("Failed to find lifepod fabricator component");
             return recipe;
         }
-
         const auto itemList = reinterpret_cast<Unreal::TArray<TSoftObjectPtr<SDK::UObject>>*>(&lifepodCrafter->AllowedRecipesOverride);
-        itemList->Add(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipe));
+
+        if (availableInLifePod) {
+            itemList->Add(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipe));
+            registeredRecipesLifePod.push_back(recipe);
+        } else if (modifyMode) {
+            for (int i = 0; i < itemList->Num(); i++) {
+                if ((*itemList)[i].ObjectID.AssetPath.AssetName.ToString() != recipe->GetName())
+                    continue;
+                itemList->RemoveAt(i);
+                break;
+            }
+        }
     }
 
-    Log::Verbose("Recipe registered: {}", recipeId);
+    Log::Verbose("Recipe {}: {}", modifyMode ? "modified" : "registered", recipeId);
     return recipe;
 }

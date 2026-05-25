@@ -1,4 +1,25 @@
 
+[[recipe_delete]]
+id = "Flashlight"
+
+
+[[recipe_modify]]
+id = "MetalSalvage"
+available_in_lifepod = false # You can override the lifepod state
+
+[[recipe_modify.ingredients]]
+MetalSalvage = 2
+Copper = 2
+
+[[recipe_modify.outputs]]
+Titanium = 6
+
+
+[[recipe_modify]]
+id = "BuilderTool"
+remove_unlocking_rules = true # This will remove all unlocking requirements. Not necessary when overwriting.
+
+
 [[recipe]]
 id = "CustomRecipe"
 name = "Custom Recipe"

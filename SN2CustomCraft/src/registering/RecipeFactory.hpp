@@ -15,6 +15,10 @@ class RecipeFactory {
     static std::vector<SDK::UUWECraftingRecipe*> registeredRecipes;
     static std::vector<SDK::UUWECraftingRecipe*> registeredRecipesLifePod;
 
+    bool modifyMode = false;
+    bool availableInLifePodModify = false;
+    bool removeRequirementsModify = false;
+
     std::string recipeId, recipeName, recipeDescription;
 
     bool availableInLifePod = false;
@@ -27,6 +31,7 @@ class RecipeFactory {
     float craftingTime = 2.0f;
 
     static SDK::UUWEItemType *searchItem(const std::string &itemId);
+    static SDK::UUWECraftingRecipe *searchRecipe(const std::string &recipeId);
     static SDK::UUWECraftingRecipeCategory *searchRecipeCategory(const std::string &categoryId);
     static SDK::UUWEScanData *searchScanData(const std::string &scanId);
 
@@ -38,6 +43,7 @@ class RecipeFactory {
 
 public:
     explicit RecipeFactory(std::string recipeId, std::string recipeName, std::string recipeDescription);
+    explicit RecipeFactory(std::string recipeId);
 
     bool setCategory(const std::string &categoryId);
     bool setCategory(SDK::UUWECraftingRecipeCategory *category);
@@ -59,9 +65,10 @@ public:
     bool addUnlockingRequirementScanData(const std::string &ruleSet, SDK::UUWEScanData* data);
 
     bool addUnlockingRequirement(const std::string &ruleSet, SDK::FUWERecipeUnlockRuleEntry entry);
+    void modifyRemoveRequirements();
 
     void setCraftingTime(float time);
-    void makeAvailableInLifePod();
+    void setAvailableInLifepod(bool available);
 
     [[nodiscard]] SDK::UUWECraftingRecipe* registerRecipe() const;
 };

@@ -36,7 +36,7 @@ void FileTraversal::ScanFiles() {
 
                 if (toml.contains("category"))
                     categoryTables.push_back(scan);
-                if (toml.contains("recipe"))
+                if (toml.contains("recipe") || toml.contains("recipe_modify") || toml.contains("recipe_delete"))
                     recipeTables.push_back(scan);
             } catch (const toml::parse_error& e) {
                 Log::Warning("Failed to parse file {}: {}", file.path().string(), e.what());
