@@ -157,7 +157,7 @@ void RecipeParser::parseFile(std::string file, const toml::table &table) {
         recipies.insert(std::make_pair(recipeId, result));
 }
 
-void RecipeParser::parseRecipes() {
+void RecipeParser::ParseRecipes() {
     for (const auto&[path, toml] : FileTraversal::recipeTables) {
         if (!toml["recipe"].is_array()) {
             Log::Warning("Malformed recipe file {}", path);

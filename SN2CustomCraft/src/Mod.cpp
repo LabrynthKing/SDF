@@ -28,8 +28,10 @@ public:
         if (scanning)
             return;
         Hooks::UnregisterHooks();
+
         RecipeFactory::unregisterAllRecipes();
         CategoryFactory::unregisterAllCategories();
+        FileTraversal::DeleteCache();
     }
 
     auto on_update() -> void override {
@@ -47,8 +49,8 @@ public:
         Hooks::RegisterHooks();
 
         FileTraversal::ScanFiles();
-        CategoryParser::parseCategories();
-        RecipeParser::parseRecipes();
+        CategoryParser::ParseCategories();
+        RecipeParser::ParseRecipes();
 
         //CategoryFactory upperCategory("UpperCategory", "Upper Category", "This is an upper category", ECrafterType::Fabricator);
         //upperCategory.setIconFromItem("MetalSalvage");

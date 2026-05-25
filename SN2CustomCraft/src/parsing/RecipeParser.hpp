@@ -16,5 +16,5 @@ class RecipeParser {
     static void parseFile(std::string file, const toml::table &table);
 
 public:
-    static void parseRecipes();
+    static void ParseRecipes();
 };

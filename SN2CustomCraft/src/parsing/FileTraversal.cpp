@@ -44,3 +44,8 @@ void FileTraversal::ScanFiles() {
         }
     }
 }
+
+void FileTraversal::DeleteCache() {
+    categoryTables.clear();
+    recipeTables.clear();
+}

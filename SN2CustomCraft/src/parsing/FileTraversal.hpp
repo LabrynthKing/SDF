@@ -17,7 +17,8 @@ class FileTraversal {
 
     friend class CategoryParser;
     friend class RecipeParser;
+    friend class SN2CustomCraft;
 
-public:
     static void ScanFiles();
+    static void DeleteCache();
 };

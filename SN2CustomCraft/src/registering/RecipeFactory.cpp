@@ -209,7 +209,3 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     Log::Verbose("Recipe registered: {}", recipeId);
     return recipe;
 }
-
-std::vector<UUWECraftingRecipe*> RecipeFactory::getAllRegisteredRecipes() {
-    return registeredRecipes;
-}

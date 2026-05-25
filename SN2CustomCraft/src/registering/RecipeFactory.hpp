@@ -32,6 +32,7 @@ class RecipeFactory {
 
     friend class CategoryFactory;
     friend class SN2CustomCraft;
+    friend class Hooks;
 
     static void unregisterAllRecipes();
 
@@ -63,6 +64,4 @@ public:
     void makeAvailableInLifePod();
 
     [[nodiscard]] SDK::UUWECraftingRecipe* registerRecipe() const;
-
-    static std::vector<SDK::UUWECraftingRecipe*> getAllRegisteredRecipes();
 };

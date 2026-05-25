@@ -16,5 +16,5 @@ class CategoryParser {
     static void parseFile(std::string file, const toml::table &table);
 
 public:
-    static void parseCategories();
+    static void ParseCategories();
 };

@@ -10,17 +10,24 @@
 #include "RecipeFactory.hpp"
 #include "polyhook2/Exceptions/AVehHook.hpp"
 #include "SDK/Subnautica2_classes.hpp"
+#include "Hooks/Hooks.hpp"
+
+#include "UnrealDef.hpp"
+
+using namespace SDK;
+using namespace RC;
+using namespace Unreal;
 
 getRecipeT Hooks::originalGetRecipes = nullptr;
+Hook::GlobalCallbackId Hooks::lifepodFabricatorHook;
 
 std::unique_ptr<PLH::Detour> Hooks::getRecipesHook = nullptr;
 
-RC::Unreal::TArray<UUWECraftingRecipe*> Hooks::GetRecipesHook() {
-    const auto registered = RecipeFactory::getAllRegisteredRecipes();
+Unreal::TArray<UUWECraftingRecipe*> Hooks::GetRecipesHook() {
     auto recipes = originalGetRecipes();
+    recipes.ResizeTo(static_cast<int32_t>(recipes.Num() + RecipeFactory::registeredRecipes.size()));
 
-    recipes.ResizeTo(static_cast<int32_t>(recipes.Num() + registered.size()));
-    for (const UUWECraftingRecipe* recipe : registered) {
+    for (const UUWECraftingRecipe* recipe : RecipeFactory::registeredRecipes) {
         recipes.Add(const_cast<UUWECraftingRecipe*>(recipe));
     }
     return recipes;
@@ -60,6 +67,23 @@ void Hooks::RegisterHooks() {
         Log::Verbose("Successfully hooked recipe registry");
     else
         Log::Error("Failed to hook recipe registry!");
+
+    // TODO: Improve performance and move to function
+    lifepodFabricatorHook = Hook::RegisterStaticConstructObjectPostCallback([](const Hook::TCallbackIterationData<RC::UObject*>& info, const FStaticConstructObjectParameters& _) {
+        const auto object = info.GetOriginalFunctionCallResult();
+        if (const auto fullName = object->GetFullName(); fullName.starts_with(L"UWECrafterComponent") && fullName.contains(L"BP_Fabricator_Lifepod")) {
+
+            const auto lifepodCrafter = reinterpret_cast<UUWECrafterComponent*>(object);
+            const auto itemList = reinterpret_cast<Unreal::TArray<TSoftObjectPtr<SDK::UObject>>*>(&lifepodCrafter->AllowedRecipesOverride);
+
+            itemList->ResizeTo(itemList->Num() + static_cast<int32_t>(RecipeFactory::registeredRecipesLifePod.size()));
+            for (const auto& item : RecipeFactory::registeredRecipesLifePod) {
+                itemList->Add(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(item));
+                Log::Warning("Patching list {}", itemList->Num());
+            }
+        }
+    }, { false, false, L"SN2CustomCraft", L"LifepodFabricatorStaticConstructObjectHook" });
+    Log::Verbose("Successfully hooked lifepod fabricator creation");
 }
 
 void Hooks::UnregisterHooks() {
@@ -67,4 +91,7 @@ void Hooks::UnregisterHooks() {
         Log::Verbose("Successfully unhooked recipe registry");
     else
         Log::Error("Failed to unhook recipe registry!");
+
+    Hook::UnregisterCallback(lifepodFabricatorHook);
+    Log::Verbose("Successfully unhooked lifepod fabricator creation");
 }
