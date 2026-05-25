@@ -7,7 +7,6 @@
 #include "parsing/CategoryParser.hpp"
 #include "parsing/FileTraversal.hpp"
 #include "parsing/RecipeParser.hpp"
-#include "registering/CategoryFactory.hpp"
 #include "util/Log.hpp"
 
 using namespace RC;
@@ -29,8 +28,8 @@ public:
             return;
         Hooks::UnregisterHooks();
 
-        RecipeFactory::unregisterAllRecipes();
-        CategoryFactory::unregisterAllCategories();
+        // TODO: RecipeFactory::unregisterAllRecipes();
+        // TODO: CategoryFactory::unregisterAllCategories();
         FileTraversal::DeleteCache();
     }
 

@@ -64,3 +64,15 @@ CookedHalfmoon = 3
 
 [[recipe.outputs]]
 BiofuelBlock = 3
+
+
+[[recipe]]
+id = "CustomBuilderRecipe"
+name = "Custom Builder Recipe"
+description = "This is a recipe for testing custom builder actions"
+
+category = "CustomBuilderActions"
+
+[[recipe.ingredients]]
+Titanium = 3
+Copper = 1
