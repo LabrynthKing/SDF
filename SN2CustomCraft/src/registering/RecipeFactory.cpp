@@ -203,8 +203,19 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     }
 
     registeredRecipes.push_back(recipe);
-    if (availableInLifePod)
+    if (availableInLifePod) {
         registeredRecipesLifePod.push_back(recipe);
+
+        const auto staticBrokenFabricator = UObjectGlobals::StaticFindObject(nullptr, nullptr, L"/Game/Blueprints/Crafting/BP_Fabricator_Lifepod.Default__BP_Fabricator_Lifepod_C:Crafter");
+        const auto lifepodCrafter = reinterpret_cast<UUWECrafterComponent*>(staticBrokenFabricator);
+        if (lifepodCrafter == nullptr) {
+            Log::Warning("Failed to find lifepod fabricator component");
+            return recipe;
+        }
+
+        const auto itemList = reinterpret_cast<Unreal::TArray<TSoftObjectPtr<SDK::UObject>>*>(&lifepodCrafter->AllowedRecipesOverride);
+        itemList->Add(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipe));
+    }
 
     Log::Verbose("Recipe registered: {}", recipeId);
     return recipe;

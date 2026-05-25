@@ -7,7 +7,6 @@
 #include <SDK/UWECrafting_classes.hpp>
 #include "polyhook2/Detour/x64Detour.hpp"
 #include "Containers/Array.hpp"
-#include "Hooks/GlobalCallbackId.hpp"
 
 using getRecipeT = RC::Unreal::TArray<SDK::UUWECraftingRecipe*>(*)();
 
@@ -15,7 +14,6 @@ class Hooks {
     static getRecipeT originalGetRecipes;
 
     static std::unique_ptr<PLH::Detour> getRecipesHook;
-    static RC::Unreal::Hook::GlobalCallbackId lifepodFabricatorHook;
 
     static RC::Unreal::TArray<SDK::UUWECraftingRecipe*> GetRecipesHook();
 

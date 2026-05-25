@@ -81,14 +81,12 @@ void RecipeParser::parseFile(std::string file, const toml::table &table) {
             }
             for (const auto&[first, second] : *outputTable.as_table()) {
                 if (!second.is_integer()) {
-                    if (!second.is_integer()) {
-                        Log::Warning("Recipe {} has malformed amount for output {}", recipeId, first.str());
-                        return;
-                    }
-                    if (const auto count = static_cast<int32_t>(second.as_integer()->get());
-                        !factory.addOutput(std::string(first.begin(), first.end()), count))
-                        Log::Warning("Failed to add output {} to recipe {}", first.str(), recipeId);
+                    Log::Warning("Recipe {} has malformed amount for output {}", recipeId, first.str());
+                    return;
                 }
+                if (const auto count = static_cast<int32_t>(second.as_integer()->get());
+                    !factory.addOutput(std::string(first.begin(), first.end()), count))
+                    Log::Warning("Failed to add output {} to recipe {}", first.str(), recipeId);
             }
         }
     } else
