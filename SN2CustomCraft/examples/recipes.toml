@@ -76,3 +76,6 @@ category = "CustomBuilderActions"
 [[recipe.ingredients]]
 Titanium = 3
 Copper = 1
+
+[[recipe.outputs]]
+TableDining = 1

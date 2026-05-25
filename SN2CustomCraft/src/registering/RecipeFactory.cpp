@@ -181,7 +181,7 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
         return nullptr;
 
     if (!modifyMode) {
-        recipe->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}_CustomCraftRecipe", recipeId)).c_str());
+        recipe->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}Recipe", recipeId)).c_str());
         recipe->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
 
         recipe->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(recipeName).c_str());

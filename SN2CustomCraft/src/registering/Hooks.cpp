@@ -12,6 +12,7 @@
 #include "SDK/Subnautica2_classes.hpp"
 #include "Hooks/Hooks.hpp"
 
+#include "BuilderActionFactory.hpp"
 #include "UnrealDef.hpp"
 
 using namespace SDK;
@@ -26,7 +27,7 @@ std::unique_ptr<PLH::Detour> Hooks::getActionsHook = nullptr;
 
 Unreal::TArray<UUWECraftingRecipe*> Hooks::GetRecipesHook() {
     auto recipes = originalGetRecipes();
-    recipes.ResizeTo(static_cast<int32_t>(recipes.Num() + RecipeFactory::registeredRecipes.size()));
+    recipes.ResizeTo(recipes.Num() + static_cast<int32_t>(RecipeFactory::registeredRecipes.size()));
 
     for (const UUWECraftingRecipe* recipe : RecipeFactory::registeredRecipes) {
         recipes.Add(const_cast<UUWECraftingRecipe*>(recipe));
@@ -36,8 +37,11 @@ Unreal::TArray<UUWECraftingRecipe*> Hooks::GetRecipesHook() {
 
 Unreal::TArray<USN2BuilderActionData*> Hooks::GetActionsHook() {
     auto actions = originalGetActions();
-    // TODO: Add actions
-    Log::Verbose("GetActionsHook called");
+    actions.ResizeTo(actions.Num() + static_cast<int32_t>(BuilderActionFactory::registeredActions.size()));
+
+    for (const USN2BuilderActionData* action : BuilderActionFactory::registeredActions) {
+        actions.Add(const_cast<USN2BuilderActionData*>(action));
+    }
     return actions;
 }
 

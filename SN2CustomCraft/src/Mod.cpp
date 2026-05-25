@@ -7,6 +7,7 @@
 #include "parsing/CategoryParser.hpp"
 #include "parsing/FileTraversal.hpp"
 #include "parsing/RecipeParser.hpp"
+#include "registering/BuilderActionFactory.hpp"
 #include "util/Log.hpp"
 
 using namespace RC;
@@ -51,9 +52,9 @@ public:
         CategoryParser::ParseCategories();
         RecipeParser::ParseRecipes();
 
-        //CategoryFactory upperCategory("UpperCategory", "Upper Category", "This is an upper category", ECrafterType::Fabricator);
-        //upperCategory.setIconFromItem("MetalSalvage");
-        //const auto upperCatPtr = upperCategory.registerCategory();
+        BuilderActionFactory factory("CustomBuilderRecipe");
+        if (!factory.registerBuilderAction())
+            Log::Error("Errm what the sigma");
     }
 };
 
