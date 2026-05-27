@@ -35,6 +35,7 @@ class RecipeFactory {
     static SDK::UUWECraftingRecipeCategory *searchRecipeCategory(const std::string &categoryId);
     static SDK::UUWEScanData *searchScanData(const std::string &scanId);
 
+    friend class ItemTypeFactory;
     friend class BuilderActionFactory;
     friend class CategoryFactory;
     friend class SN2CustomCraft;

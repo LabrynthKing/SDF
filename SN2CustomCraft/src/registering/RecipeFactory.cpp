@@ -195,7 +195,7 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
         recipe->CraftingTime = craftingTime;
 
     const auto requirements = reinterpret_cast<Unreal::TArray<FCraftingRecipeRequirement>*>(&recipe->Requirements);
-    if (modifyMode && ingredients.size() > 0)
+    if (modifyMode && !ingredients.empty())
         requirements->SetNum(0, EAllowShrinking::Yes);
 
     requirements->ResizeTo(requirements->Num() + static_cast<int32_t>(ingredients.size()));
@@ -204,7 +204,7 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     }
 
     const auto output = reinterpret_cast<Unreal::TArray<FCraftingRecipeOutput>*>(&recipe->Output);
-    if (modifyMode && outputs.size() > 0)
+    if (modifyMode && !outputs.empty())
         output->SetNum(0, EAllowShrinking::Yes);
 
     output->ResizeTo(output->Num() + static_cast<int32_t>(outputs.size()));

@@ -8,6 +8,7 @@
 #include "parsing/FileTraversal.hpp"
 #include "parsing/RecipeParser.hpp"
 #include "registering/BuilderActionFactory.hpp"
+#include "registering/ItemTypeFactory.hpp"
 #include "util/Log.hpp"
 
 using namespace RC;
@@ -47,6 +48,11 @@ public:
 
     static void Startup() {
         Hooks::RegisterHooks();
+
+        //ItemTypeFactory type("CustomItem", "Custom Item Type", "This is a custom item type because why tf not");
+        //type.setIconFromItem("Titanium");
+        //if (!type.registerItemType())
+        //    Log::Error("What in the skibidi");
 
         FileTraversal::ScanFiles();
         CategoryParser::ParseCategories();

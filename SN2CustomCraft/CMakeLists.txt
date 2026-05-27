@@ -9,6 +9,7 @@ add_library(${TARGET} SHARED
         src/Mod.cpp
         src/registering/Hooks.cpp
         src/registering/RecipeFactory.cpp
+        src/registering/ItemTypeFactory.cpp
         src/registering/BuilderActionFactory.cpp
         src/registering/CategoryFactory.cpp
         src/parsing/FileTraversal.cpp
@@ -19,6 +20,7 @@ add_library(${TARGET} SHARED
         ../libs/CppSDK/SDK/Basic.cpp
         ../libs/CppSDK/SDK/CoreUObject_functions.cpp
         ../libs/CppSDK/SDK/Engine_functions.cpp
+        ../libs/CppSDK/SDK/AssetRegistry_functions.cpp
 )
 
 target_link_libraries(${TARGET} PUBLIC UE4SS)
