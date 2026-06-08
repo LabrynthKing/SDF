@@ -16,16 +16,18 @@ UUWEItemType *Finders::searchItem(const std::string &itemId) {
 }
 
 UUWECraftingRecipe *Finders::searchRecipe(const std::string &recipeId) {
-    const std::string trueExpr = "DA_" + recipeId + "Recipe";
-    const auto item = RC::Unreal::UObjectGlobals::FindObject(L"UWECraftingRecipe", UtfN::StringToWString(trueExpr).c_str());
+    std::string trueExpr = "DA_" + recipeId + "Recipe";
+    auto item = RC::Unreal::UObjectGlobals::FindObject(L"UWECraftingRecipe", UtfN::StringToWString(trueExpr).c_str());
+    if (item == nullptr) {
+        trueExpr = "DA_" + recipeId + "_Recipe";
+        item = RC::Unreal::UObjectGlobals::FindObject(L"UWECraftingRecipe", UtfN::StringToWString(trueExpr).c_str());
+    }
     return reinterpret_cast<UUWECraftingRecipe*>(item);
 }
 
 UUWECraftingRecipeCategory *Finders::searchRecipeCategory(const std::string &categoryId) {
     const std::string trueExpr = "DA_" + categoryId;
     const auto item = RC::Unreal::UObjectGlobals::FindObject(L"UWECraftingRecipeCategory", UtfN::StringToWString(trueExpr).c_str());
-    if (item == nullptr && !categoryId.ends_with("_"))
-        return searchRecipeCategory(categoryId + "_");
     return reinterpret_cast<UUWECraftingRecipeCategory*>(item);
 }
 
