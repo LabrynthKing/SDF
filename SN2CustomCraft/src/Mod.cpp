@@ -84,6 +84,7 @@ public:
         std::vector<Unreal::UObject*> list{};
         RC::UObjectGlobals::FindAllOf(L"UWEAssetRegistrySubsystem", list);
 
+        // Step 1 of finally registering items
         for (const auto& i : list) {
             if (!i->GetFullName().contains(L"/Engine/Transient.GameEngine"))
                 continue;
@@ -105,6 +106,9 @@ public:
                 Log::Warning("Item type inserted");
             }
         }
+
+        // Step 2 (Research)
+        USN2AssetRegistry::RebuildAssetRegistryCachedData();
     }
 };
 

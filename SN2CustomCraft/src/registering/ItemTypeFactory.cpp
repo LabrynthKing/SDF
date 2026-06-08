@@ -64,6 +64,10 @@ UUWEItemType* ItemTypeFactory::registerItemType() const {
 
     itemType->ActorClass = base->ActorClass;
 
+    itemType->TypeTag = FGameplayTag(UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("ItemType.Custom.{}", itemId)).c_str()));
+    itemType->GameplayTags = base->GameplayTags;
+    itemType->TunableData = base->TunableData;
+
     registeredItemTypes.push_back(itemType);
 
     const auto assetData = UAssetRegistryHelpers::CreateAssetData(itemType, true);

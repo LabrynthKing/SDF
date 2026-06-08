@@ -21,7 +21,7 @@ using namespace SDK;
 using namespace RC;
 using namespace Unreal;
 
-#define HookDefStatic(type, name, list) \
+#define HookDefStatic(type, name, list, message) \
     Hooks::get##name##T Hooks::originalGet##name = nullptr; \
     std::unique_ptr<PLH::Detour> Hooks::get##name##Hook = nullptr; \
     \
@@ -29,20 +29,21 @@ using namespace Unreal;
         auto entries = originalGet##name(); \
         entries.ResizeTo(entries.Num() + static_cast<int32_t>(list.size())); \
         \
+        if(message) \
+            Log::Warning("{} {}", #name, entries.Num()); \
+        \
         for (const type* entry : list) { \
             entries.Add(const_cast<type*>(entry)); \
         } \
         return entries; \
     }
 
-HookDefStatic(UUWECraftingRecipe, Recipes, RecipeFactory::registeredRecipes)
-HookDefStatic(USN2BuilderActionData, BuilderActions, BuilderActionFactory::registeredActions)
+HookDefStatic(UUWECraftingRecipe, Recipes, RecipeFactory::registeredRecipes, false)
+HookDefStatic(USN2BuilderActionData, BuilderActions, BuilderActionFactory::registeredActions, false)
+HookDefStatic(UUWEItemType, ItemTypes, ItemTypeFactory::registeredItemTypes, true)
 
 Hooks::getAssetsT Hooks::originalGetAssets = nullptr;
 std::unique_ptr<PLH::Detour> Hooks::getAssetsHook = nullptr;
-
-Hooks::getEnumerateAssetsT Hooks::originalGetEnumerateAssets = nullptr;
-std::unique_ptr<PLH::Detour> Hooks::getEnumerateAssetsHook = nullptr;
 
 bool Hooks::GetAssetsHook(void* self, const FARFilter *filter, Unreal::TArray<SDK::FAssetData> *out, const bool bSkipARFilteredAsset) {
     bool ret = originalGetAssets(self, filter, out, bSkipARFilteredAsset);
@@ -76,11 +77,6 @@ bool Hooks::GetAssetsHook(void* self, const FARFilter *filter, Unreal::TArray<SD
         Log::Warning("Scanning for packagepath: {}", name.ToString());
 
     return ret;
-}
-
-bool Hooks::GetEnumerateAssetsHook(void *self, const FARFilter *filter, TFunctionRef<bool(const SDK::FAssetData&)> *out, bool bSkipARFilteredAsset) {
-    Log::Warning("Enumerating Assets");
-    return originalGetEnumerateAssets(self, filter, out, bSkipARFilteredAsset);
 }
 
 uintptr_t Hooks::ScanCall(uintptr_t address, int ordinal) {
@@ -137,6 +133,7 @@ void Hooks::RegisterHooks() {
 
     HookDefScan(Recipes, "GetAllCraftingRecipes", 1);
     HookDefScan(BuilderActions, "GetAllBuilderActions", 1);
+    HookDefScan(ItemTypes, "GetAllItemTypes", 1);
 
     const auto assetRegistryVTable = *static_cast<uintptr_t**>(SDK::UAssetRegistryHelpers::GetAssetRegistry().InterfacePointer);
 
@@ -148,13 +145,13 @@ void Hooks::RegisterHooks() {
 
     HookDefHook(Recipes);
     HookDefHook(BuilderActions);
+    HookDefHook(ItemTypes);
     HookDefHook(Assets);
-    HookDefHook(EnumerateAssets);
 }
 
 void Hooks::UnregisterHooks() {
     HookDefUnhook(Recipes);
     HookDefUnhook(BuilderActions);
+    HookDefUnhook(ItemTypes);
     HookDefUnhook(Assets);
-    HookDefUnhook(EnumerateAssets);
 }
