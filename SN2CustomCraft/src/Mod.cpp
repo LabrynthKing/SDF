@@ -21,9 +21,9 @@ class SN2CustomCraft : public CppUserModBase {
 public:
     SN2CustomCraft() {
         ModVersion = STR("0.1");
-        ModName = STR("SN2CustomCraft");
+        ModName = STR("Subnautica Data Framework");
         ModAuthors = STR("Limo");
-        ModDescription = STR("A utility mod that allows anyone to modify the games crafting recipes");
+        ModDescription = STR("A Subnautica 2 framework that allows for data driven content mods");
 
         Log::Verbose("Initialized");
     }
