@@ -24,6 +24,8 @@ UUWECraftingRecipe *Finders::searchRecipe(const std::string &recipeId) {
 UUWECraftingRecipeCategory *Finders::searchRecipeCategory(const std::string &categoryId) {
     const std::string trueExpr = "DA_" + categoryId;
     const auto item = RC::Unreal::UObjectGlobals::FindObject(L"UWECraftingRecipeCategory", UtfN::StringToWString(trueExpr).c_str());
+    if (item == nullptr && !categoryId.ends_with("_"))
+        return searchRecipeCategory(categoryId + "_");
     return reinterpret_cast<UUWECraftingRecipeCategory*>(item);
 }
 

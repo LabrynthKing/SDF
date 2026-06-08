@@ -32,8 +32,9 @@ void CategoryParser::parseFile(std::string file, const toml::table &table, const
     const auto categoryName = table.contains("name") ? table["name"].as_string()->get() : "Empty";
 
     if (!modifyMode && (!table.contains("description") || !table["description"].is_string())) {
-        Log::Warning("Category {} is missing a description", categoryId);
-        return;
+        //Log::Warning("Category {} is missing a description", categoryId);
+        //return;
+        // Categories are not actually needed at the current moment
     }
     const auto categoryDescription = table.contains("description") ? table["description"].as_string()->get() : "Empty";
 
