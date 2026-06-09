@@ -155,6 +155,10 @@ void RecipeParser::parseFile(std::string file, const toml::table &table, const b
         factory.modifyRemoveRequirements();
     }
 
+    if (table.contains("ordering_index") && table["ordering_index"].is_integer()) {
+        factory.setOrderingIndex(static_cast<int32_t>(table["ordering_index"].as_integer()->get()));
+    }
+
     if (const auto result = factory.registerRecipe(); result == nullptr)
         Log::Warning("Recipe {} failed to {} for an unknown reason", modifyMode ? "modify" : "register", recipeId);
     else

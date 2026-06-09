@@ -29,6 +29,7 @@ crafted_by = "Fabricator"
 [[category_modify]]
 id = "Sustenance"
 name = "Cooked stuff or sum"
+ordering_index = -999
 
 
 [[category_delete]]

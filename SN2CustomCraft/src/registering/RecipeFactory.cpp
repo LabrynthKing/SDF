@@ -155,6 +155,11 @@ void RecipeFactory::setAvailableInLifepod(const bool available) {
     availableInLifePodModify = true;
 }
 
+void RecipeFactory::setOrderingIndex(const int orderingIndex) {
+    this->orderingIndex = orderingIndex;
+    orderingIndexModify = true;
+}
+
 UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     const auto base = Finders::searchRecipe("MetalSalvage");
     if (base == nullptr)
@@ -168,6 +173,8 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
         recipe->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}Recipe", recipeId)).c_str());
         recipe->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
     }
+    if (orderingIndexModify)
+        recipe->OrderingIndex = orderingIndex;
 
     if (recipeTextureModified)
         recipe->Thumbnail = recipeTexture;

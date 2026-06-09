@@ -7,6 +7,7 @@ id = "Flashlight"
 id = "MetalSalvage"
 description = "This is a modified description :)"
 available_in_lifepod = false # You can override the lifepod state
+ordering_index = -999
 
 [[recipe_modify.ingredients]]
 MetalSalvage = 2

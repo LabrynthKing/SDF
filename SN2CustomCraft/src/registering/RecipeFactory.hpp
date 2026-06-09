@@ -20,6 +20,8 @@ class RecipeFactory {
     bool removeRequirementsModify = false;
 
     std::string recipeId, recipeName, recipeDescription;
+    int orderingIndex;
+    bool orderingIndexModify;
 
     bool availableInLifePod = false;
     SDK::UUWECraftingRecipeCategory* recipeCategory = nullptr;
@@ -65,6 +67,7 @@ public:
 
     void setCraftingTime(float time);
     void setAvailableInLifepod(bool available);
+    void setOrderingIndex(int orderingIndex);
 
     [[nodiscard]] SDK::UUWECraftingRecipe* registerRecipe() const;
 };

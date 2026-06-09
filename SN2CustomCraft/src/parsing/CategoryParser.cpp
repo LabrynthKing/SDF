@@ -34,7 +34,7 @@ void CategoryParser::parseFile(std::string file, const toml::table &table, const
     if (!modifyMode && (!table.contains("description") || !table["description"].is_string())) {
         //Log::Warning("Category {} is missing a description", categoryId);
         //return;
-        // Categories are not actually needed at the current moment
+        // Category descriptions are not actually needed at the current moment
     }
     const auto categoryDescription = table.contains("description") ? table["description"].as_string()->get() : "Empty";
 
@@ -73,6 +73,10 @@ void CategoryParser::parseFile(std::string file, const toml::table &table, const
             Log::Warning("Category {} has invalid icon path '{}'", categoryId, iconPath);
             return;
         }
+    }
+
+    if (table.contains("ordering_index") && table["ordering_index"].is_integer()) {
+        factory.setOrderingIndex(static_cast<int32_t>(table["ordering_index"].as_integer()->get()));
     }
 
     if (const auto result = factory.registerCategory(); result == nullptr)

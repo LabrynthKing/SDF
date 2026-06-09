@@ -71,6 +71,11 @@ void CategoryFactory::setCrafterType(const ECrafterType crafterType) {
     }
 }
 
+void CategoryFactory::setOrderingIndex(const int orderingIndex) {
+    this->orderingIndex = orderingIndex;
+    orderingIndexModify = true;
+}
+
 bool CategoryFactory::setParent(const std::string &categoryId) {
     return setParent(Finders::searchRecipeCategory(categoryId));
 }
@@ -115,6 +120,8 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
         recipeCategory->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}", categoryId)).c_str());
         recipeCategory->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
     }
+    if (orderingIndexModify)
+        recipeCategory->OrderingIndex = orderingIndex;
 
     if (!modifyMode || categoryName != "Empty")
         recipeCategory->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(categoryName).c_str());
