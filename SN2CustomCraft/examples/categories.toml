@@ -22,6 +22,7 @@ parent_category = "BuilderBaseObjectCategory"
 id = "CustomRootCategory"
 name = "Custom Root Category"
 description = "This category lives in a fabricators root"
+show_when_empty = true
 
 crafted_by = "Fabricator"
 

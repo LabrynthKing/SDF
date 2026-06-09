@@ -79,6 +79,10 @@ void CategoryParser::parseFile(std::string file, const toml::table &table, const
         factory.setOrderingIndex(static_cast<int32_t>(table["ordering_index"].as_integer()->get()));
     }
 
+    if (table.contains("show_when_empty") && table["show_when_empty"].is_boolean()) {
+        factory.setShowWhenEmpty(table["show_when_empty"].as_boolean()->get());
+    }
+
     if (const auto result = factory.registerCategory(); result == nullptr)
         Log::Warning("Category {} failed to register for an unknown reason", categoryId);
     else

@@ -30,6 +30,8 @@ add_library(${TARGET} SHARED
 target_link_libraries(${TARGET} PUBLIC UE4SS)
 target_include_directories(${TARGET} PRIVATE src ${SDK_INCLUDE} ${HEADER_ONLY_INCLUDE})
 
+target_compile_definitions(${TARGET} PRIVATE DEVELOPMENT)
+
 message(STATUS "${CMAKE_CONFIGURATION_TYPES}")
 
 add_custom_command(TARGET ${TARGET} POST_BUILD

@@ -76,6 +76,11 @@ void CategoryFactory::setOrderingIndex(const int orderingIndex) {
     orderingIndexModify = true;
 }
 
+void CategoryFactory::setShowWhenEmpty(const bool showWhenEmpty) {
+    this->showWhenEmpty = showWhenEmpty;
+    showWhenEmptyModify = true;
+}
+
 bool CategoryFactory::setParent(const std::string &categoryId) {
     return setParent(Finders::searchRecipeCategory(categoryId));
 }
@@ -122,11 +127,13 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
     }
     if (orderingIndexModify)
         recipeCategory->OrderingIndex = orderingIndex;
+    if (showWhenEmptyModify)
+        recipeCategory->bShowWhenEmpty = showWhenEmpty;
 
     if (!modifyMode || categoryName != "Empty")
         recipeCategory->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(categoryName).c_str());
     if (!modifyMode || categoryDescription != "Empty")
-    recipeCategory->Description = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(categoryDescription).c_str());
+        recipeCategory->Description = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(categoryDescription).c_str());
     if (categoryTextureModified)
         recipeCategory->Thumbnail = categoryTexture;
     if (modifyCrafterType)
@@ -134,7 +141,6 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
 
     if (categoryParent != nullptr)
         recipeCategory->ParentCategory = static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(categoryParent));
-
 
 #ifdef DEVELOPMENT
     if (rootCategory && !modifyMode) {

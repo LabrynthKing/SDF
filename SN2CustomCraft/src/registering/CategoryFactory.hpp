@@ -14,8 +14,12 @@ class CategoryFactory {
     std::string categoryId, categoryName, categoryDescription;
     SDK::ECrafterType crafterType;
     bool rootCategory = true;
+
     int orderingIndex;
     bool orderingIndexModify;
+
+    bool showWhenEmpty = false;
+    bool showWhenEmptyModify = false;
 
     bool modifyMode = false;
     bool modifyCrafterType = false;
@@ -36,6 +40,7 @@ public:
 
     void setCrafterType(SDK::ECrafterType crafterType);
     void setOrderingIndex(int orderingIndex);
+    void setShowWhenEmpty(bool showWhenEmpty);
 
     bool setParent(const std::string &categoryId);
     bool setParent(SDK::UUWECraftingRecipeCategory *category);
