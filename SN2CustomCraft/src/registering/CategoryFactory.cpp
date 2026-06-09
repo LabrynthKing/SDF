@@ -9,6 +9,7 @@
 #include "util/Log.hpp"
 #include "UObject.hpp"
 #include "util/Finders.hpp"
+#include "util/RegistryHelper.hpp"
 
 using namespace SDK;
 using namespace RC;
@@ -144,6 +145,8 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
 
 #ifdef DEVELOPMENT
     if (rootCategory && !modifyMode) {
+        RegistryHelper::AddToRegistry(recipeCategory, "CraftingRecipeCategory");
+
         Log::Verbose("Registering root category to UWECrafterComponent");
         std::string searchString = "Crafting/BP_Fabricator.Default__BP_Fabricator_C:Crafter";
         auto comp = Finders::searchComponent(searchString);

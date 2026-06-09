@@ -16,6 +16,7 @@ add_library(${TARGET} SHARED
         src/parsing/FileTraversal.cpp
         src/parsing/CategoryParser.cpp
         src/parsing/RecipeParser.cpp
+        src/util/RegistryHelper.cpp
         src/util/IconBuilder.cpp
         src/util/Finders.cpp
         src/util/Log.hpp
