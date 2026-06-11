@@ -148,9 +148,12 @@ void RecipeParser::parseFile(const std::string &mod, const std::string &file, co
         }
     }
 
-    if (table.contains("crafting_time") && table["crafting_time"].is_number()) {
-        const auto time = static_cast<float>(table["crafting_time"].as_floating_point()->get());
-        factory.setCraftingTime(time);
+    if (table.contains("crafting_time")) {
+        if (table["crafting_time"].is_floating_point()) {
+            const auto time = static_cast<float>(table["crafting_time"].as_floating_point()->get());
+            factory.setCraftingTime(time);
+        } else
+            Log::Warning("Recipe {} has a non floating point crafting time", recipeId);
     }
 
     if (table.contains("available_in_lifepod") && table["available_in_lifepod"].is_boolean()) {

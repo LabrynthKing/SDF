@@ -16,7 +16,7 @@
 using namespace RC;
 using namespace Unreal;
 
-#define SDFModVersion "0.1.1-alpha"
+#define SDFModVersion "0.1.2-alpha"
 #define W(x) STR(x)
 
 class SN2CustomCraft : public CppUserModBase {

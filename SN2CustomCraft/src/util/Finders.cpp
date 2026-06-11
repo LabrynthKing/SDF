@@ -16,7 +16,7 @@ UUWEItemType *Finders::searchItem(const std::string &itemId) {
 }
 
 UUWECraftingRecipe *Finders::searchRecipe(const std::string &recipeId) {
-    std::string trueExpr = "DA_" + recipeId + "Recipe";
+    std::string trueExpr = recipeId.contains("Recipe") ? "DA_" + recipeId : "DA_" + recipeId + "Recipe";
     auto item = RC::Unreal::UObjectGlobals::FindObject(L"UWECraftingRecipe", UtfN::StringToWString(trueExpr).c_str());
     if (item == nullptr) {
         trueExpr = "DA_" + recipeId + "_Recipe";
