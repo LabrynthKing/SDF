@@ -9,6 +9,7 @@
 #include "SDK/AssetRegistry_classes.hpp"
 #include "util/Finders.hpp"
 #include "util/Log.hpp"
+#include "util/RegistryHelper.hpp"
 
 using namespace SDK;
 using namespace RC;
@@ -69,13 +70,7 @@ UUWEItemType* ItemTypeFactory::registerItemType() const {
     itemType->TunableData = base->TunableData;
 
     registeredItemTypes.push_back(itemType);
-
-    const auto assetData = UAssetRegistryHelpers::CreateAssetData(itemType, true);
-    if (UAssetRegistryHelpers::GetAsset(assetData)) {
-        Log::Verbose("Yippie");
-    } else {
-        Log::Verbose("Not yippie");
-    }
+    RegistryHelper::AddToRegistry(itemType, "ItemType");
 
     Log::Verbose("Item type registered: {}", itemId);
     return itemType;

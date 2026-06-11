@@ -144,8 +144,8 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
         recipeCategory->ParentCategory = static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(categoryParent));
 
 #ifdef DEVELOPMENT
+    RegistryHelper::AddToRegistry(recipeCategory, "CraftingRecipeCategory");
     if (rootCategory && !modifyMode) {
-        RegistryHelper::AddToRegistry(recipeCategory, "CraftingRecipeCategory");
 
         Log::Verbose("Registering root category to UWECrafterComponent");
         std::string searchString = "Crafting/BP_Fabricator.Default__BP_Fabricator_C:Crafter";

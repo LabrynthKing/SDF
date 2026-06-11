@@ -90,31 +90,21 @@ public:
         std::vector<Unreal::UObject*> list{};
         RC::UObjectGlobals::FindAllOf(L"UWEAssetRegistrySubsystem", list);
 
-        // Step 1 of finally registering items
-        for (const auto& i : list) {
-            if (!i->GetFullName().contains(L"/Engine/Transient.GameEngine"))
+        // Research
+        USN2AssetRegistry::RebuildAssetRegistryCachedData();
+
+        std::vector<Unreal::UObject*> list2{};
+        UObjectGlobals::FindAllOf(L"SN2FabricatorViewModel", list2);
+
+        for (const auto& obj : list2) {
+            if (!obj->GetFullName().contains(L"/Engine/Transient."))
                 continue;
 
-            const auto obj = reinterpret_cast<UUWEAssetRegistrySubsystem*>(i);
-
-            Log::Warning("Test 1: {}", obj->CachedAssetClasses.Num());
-            Log::Warning("Test 2: {}", obj->CachedAssets.Num());
-            Log::Warning("Test 3: {}", obj->CachedBlueprintClasses.Num());
-            Log::Warning("Test 4: {}", obj->CachedDataAssets.Num());
-
-            for (auto& pair : obj->CachedDataAssets) {
-                if (!pair.First->GetFullName().contains("ItemType"))
-                    continue;
-                Log::Warning("Item Types: {}", pair.Second.Assets.Num());
-
-                auto* types = reinterpret_cast<Unreal::TArray<UUWEPrimaryDataAssetBase*>*>(&pair.Second.Assets);
-                types->Add(item);
-                Log::Warning("Item type inserted");
+            const auto test = reinterpret_cast<USN2FabricatorViewModel*>(obj);
+            for (const auto entry : test->CategoryViewModelsByCategory) {
+                Log::Warning("Test {}", entry.Second->GetCrafterText().ToString());
             }
         }
-
-        // Step 2 (Research)
-        USN2AssetRegistry::RebuildAssetRegistryCachedData();
 #endif
     }
 };
