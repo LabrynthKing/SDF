@@ -45,7 +45,7 @@ void SN2CustomCraft::startup() {
 
 
     BuilderActionFactory factory("CustomBuilderRecipeRecipe");
-    //factory.addPowerDrainText("-1 Aura");
+    factory.addPowerDrainText("-1 Aura");
     if (!factory.registerBuilderAction())
         Log::Error("Errm what the sigma");
 

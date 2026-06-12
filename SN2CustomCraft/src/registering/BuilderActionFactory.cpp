@@ -41,12 +41,9 @@ USN2BuilderConstructActionData* BuilderActionFactory::registerBuilderAction() co
         return nullptr;
     }
 
-    const auto action = static_cast<USN2BuilderConstructActionData*>(UGameplayStatics::SpawnObject(USN2BuilderConstructActionData::StaticClass(), base->Outer));
+    const auto action = RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}_ConstructData", recipeId));
     if (recipe == nullptr)
         return nullptr;
-
-    action->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}_ConstructData", recipeId)).c_str());
-    action->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
 
     action->Name_0 = recipe->Name_0;
     action->Description = recipe->Description;

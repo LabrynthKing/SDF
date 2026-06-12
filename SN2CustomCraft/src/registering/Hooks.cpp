@@ -41,8 +41,6 @@ HookDefStatic(UUWECraftingRecipe, Recipes, RecipeFactory::registeredRecipes, fal
 HookDefStatic(USN2BuilderActionData, BuilderActions, BuilderActionFactory::registeredActions, false)
 
 #ifdef DEVELOPMENT
-HookDefStatic(UUWEItemType, ItemTypes, ItemTypeFactory::registeredItemTypes, true)
-
 Hooks::getAssetsT Hooks::originalGetAssets = nullptr;
 std::unique_ptr<PLH::Detour> Hooks::getAssetsHook = nullptr;
 
@@ -59,16 +57,6 @@ bool Hooks::GetAssetsHook(void* self, const FARFilter *filter, Unreal::TArray<SD
 
     for (const auto asset : filter->ClassPaths) {
         Log::Warning("Scanning for classpath: {} {}", asset.PackageName.ToString(), asset.AssetName.ToString());
-        if (asset.AssetName.ToString() == "UWEPrimaryDataAssetBase") {
-            for (const auto entry : *out) {
-                //Log::Warning("Class found: {}", entry.AssetClassPath.AssetName.ToString());
-            }
-
-            for (auto itemType : ItemTypeFactory::registeredItemTypes) {
-                //out->Add(SDK::UAssetRegistryHelpers::CreateAssetData(itemType, true));
-                //Log::Warning("Item type added! :D");
-            }
-        }
     }
 
     for (const auto name : filter->PackageNames)
@@ -149,8 +137,7 @@ void Hooks::RegisterHooks() {
     HookDefHook(BuilderActions);
 
 #ifdef DEVELOPMENT
-    //HookDefHook(ItemTypes);
-    //HookDefHook(Assets);
+    HookDefHook(Assets);
 #endif
 }
 
@@ -159,7 +146,6 @@ void Hooks::UnregisterHooks() {
     HookDefUnhook(BuilderActions);
 
 #ifdef DEVELOPMENT
-    //HookDefUnhook(ItemTypes);
-    //HookDefUnhook(Assets);
+    HookDefUnhook(Assets);
 #endif
 }

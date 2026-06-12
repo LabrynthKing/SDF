@@ -17,14 +17,6 @@ using namespace Unreal;
 
 using EF = SDK::EObjectFlags;
 
-std::vector<UUWECraftingRecipeCategory*> CategoryFactory::registeredCategories;
-
-void CategoryFactory::unregisterAllCategories() {
-    for (const auto& registered_recipe : registeredCategories)
-        reinterpret_cast<Unreal::UObject*>(registered_recipe)->BeginDestroy();
-    registeredCategories.clear();
-}
-
 CategoryFactory::CategoryFactory(std::string categoryId, const bool modifyMode)
     : categoryId(std::move(categoryId)), categoryName(std::move("Empty")), categoryDescription(std::move("Empty")), crafterType(ECrafterType::Undefined), modifyMode(modifyMode) {
     if (!modifyMode) {
@@ -123,14 +115,10 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
     if (base == nullptr)
         return nullptr;
 
-    const auto recipeCategory = modifyMode ? Finders::searchRecipeCategory(categoryId) : static_cast<UUWECraftingRecipeCategory*>(UGameplayStatics::SpawnObject(UUWECraftingRecipeCategory::StaticClass(), base->Outer));
+    const auto recipeCategory = modifyMode ? Finders::searchRecipeCategory(categoryId) : RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}", categoryId));
     if (recipeCategory == nullptr)
         return nullptr;
 
-    if (!modifyMode) {
-        recipeCategory->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}", categoryId)).c_str());
-        recipeCategory->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
-    }
     if (orderingIndexModify)
         recipeCategory->OrderingIndex = orderingIndex;
     if (showWhenEmptyModify)
@@ -148,22 +136,8 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
     if (categoryParent != nullptr)
         recipeCategory->ParentCategory = static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(categoryParent));
 
-#ifdef DEVELOPMENT
     RegistryHelper::AddToRegistry(recipeCategory, "CraftingRecipeCategory");
-    if (rootCategory && !modifyMode) {
 
-        Log::Verbose("Registering root category to UWECrafterComponent");
-        std::string searchString = "Crafting/BP_Fabricator.Default__BP_Fabricator_C:Crafter";
-        auto comp = Finders::searchComponent(searchString);
-        if (comp != nullptr) {
-            const auto categories = reinterpret_cast<Unreal::TArray<TSoftObjectPtr<UUWECraftingRecipeCategory>>*>(&comp->AllowedRecipeCategories);
-            categories->Emplace(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(recipeCategory));
-        } else
-            Log::Warning("Finders::searchComponent failed: {}", searchString);
-    }
-#endif
-
-    registeredCategories.push_back(recipeCategory);
     Log::Verbose("Recipe category {}: {}", modifyMode ? "modified" : "registered", categoryId);
     return recipeCategory;
 }

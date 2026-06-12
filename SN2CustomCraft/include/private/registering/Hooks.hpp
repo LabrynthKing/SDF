@@ -8,7 +8,6 @@
 #include "SDK/Subnautica2_classes.hpp"
 #include "polyhook2/Detour/x64Detour.hpp"
 #include "Containers/Array.hpp"
-#include "Templates/Function.hpp"
 
 #define HookDefHeader(type, name) \
     using get##name##T = RC::Unreal::TArray<type*>(*)(); \
@@ -21,8 +20,6 @@ class Hooks {
     HookDefHeader(SDK::USN2BuilderActionData, BuilderActions)
 
 #ifdef DEVELOPMENT
-    HookDefHeader(SDK::UUWEItemType, ItemTypes)
-
     using getAssetsT = bool(*)(void*, const SDK::FARFilter*, RC::Unreal::TArray<SDK::FAssetData>*, bool);
 
     static getAssetsT originalGetAssets;

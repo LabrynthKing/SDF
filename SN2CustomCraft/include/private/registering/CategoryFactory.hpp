@@ -9,8 +9,6 @@
 #include "SDK/UWECrafting_classes.hpp"
 
 class CategoryFactory {
-    static std::vector<SDK::UUWECraftingRecipeCategory*> registeredCategories;
-
     std::string categoryId, categoryName, categoryDescription;
     SDK::ECrafterType crafterType;
     bool rootCategory = true;
@@ -29,8 +27,6 @@ class CategoryFactory {
     SDK::TSoftObjectPtr<SDK::UTexture2D> categoryTexture;
 
     friend class SN2CustomCraft;
-
-    static void unregisterAllCategories();
 
 public:
     CategoryFactory(std::string categoryId, bool modifyMode);

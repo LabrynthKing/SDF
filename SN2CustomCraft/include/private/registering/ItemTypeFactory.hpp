@@ -7,8 +7,6 @@
 #include "SDK/Subnautica2_classes.hpp"
 
 class ItemTypeFactory {
-    static std::vector<SDK::UUWEItemType*> registeredItemTypes;
-
     std::string itemId, itemName, itemDescription;
 
     SDK::TSoftObjectPtr<SDK::UTexture2D> itemTexture;

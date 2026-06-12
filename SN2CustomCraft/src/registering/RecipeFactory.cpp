@@ -8,6 +8,7 @@
 #include "UObjectGlobals.hpp"
 #include "UObject.hpp"
 #include "util/Finders.hpp"
+#include "util/RegistryHelper.hpp"
 
 using namespace SDK;
 using namespace RC;
@@ -170,14 +171,10 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     if (base == nullptr)
         return nullptr;
 
-    const auto recipe = modifyMode ? Finders::searchRecipe(recipeId) : static_cast<UUWECraftingRecipe*>(UGameplayStatics::SpawnObject(UUWECraftingRecipe::StaticClass(), base->Outer));
+    const auto recipe = modifyMode ? Finders::searchRecipe(recipeId) : RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}Recipe", recipeId));
     if (recipe == nullptr)
         return nullptr;
 
-    if (!modifyMode) {
-        recipe->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}Recipe", recipeId)).c_str());
-        recipe->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
-    }
     if (orderingIndexModify)
         recipe->OrderingIndex = orderingIndex;
 
@@ -232,6 +229,7 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
         recipe->DefaultRecipeState = ERecipeState::Locked;
     }
 
+    RegistryHelper::AddToRegistry(recipe, "CraftingRecipe");
     registeredRecipes.push_back(recipe);
     if (availableInLifePodModify) {
         const auto staticBrokenFabricator = UObjectGlobals::StaticFindObject(nullptr, nullptr, L"/Game/Blueprints/Crafting/BP_Fabricator_Lifepod.Default__BP_Fabricator_Lifepod_C:Crafter");

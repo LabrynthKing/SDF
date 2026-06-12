@@ -17,8 +17,6 @@ using namespace Unreal;
 
 using EF = SDK::EObjectFlags;
 
-std::vector<UUWEItemType*> ItemTypeFactory::registeredItemTypes;
-
 ItemTypeFactory::ItemTypeFactory(std::string itemId, std::string itemName, std::string itemDescription)
     : itemId(std::move(itemId)), itemName(std::move(itemName)), itemDescription(std::move(itemDescription)) {
 
@@ -53,16 +51,7 @@ UUWEItemType* ItemTypeFactory::registerItemType() const {
     if (base == nullptr)
         return nullptr;
 
-    FStaticConstructObjectParameters params(
-        reinterpret_cast<Unreal::UClass*>(base->Class),
-        reinterpret_cast<Unreal::UObject*>(base->Outer)
-    );
-    params.Name = Unreal::FName(UtfN::StringToWString(std::format("DA_{}_ItemType", itemId)).c_str());
-    params.SetFlags = static_cast<Unreal::EObjectFlags>(EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted);
-    params.Template = reinterpret_cast<Unreal::UObject*>(base);
-
-    //const auto itemType = static_cast<UUWEItemType*>(UGameplayStatics::SpawnObject(UUWEItemType::StaticClass(), base->Outer));
-    const auto itemType = reinterpret_cast<UUWEItemType*>(UObjectGlobals::StaticConstructObject(params));
+    const auto itemType = RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}_ItemType", itemId));
     if (itemType == nullptr)
         return nullptr;
 
@@ -82,7 +71,6 @@ UUWEItemType* ItemTypeFactory::registerItemType() const {
     itemType->GameplayTags = base->GameplayTags;
     itemType->TunableData = base->TunableData;
 
-    //registeredItemTypes.push_back(itemType);
     RegistryHelper::AddToRegistry(itemType, "ItemType");
 
     Log::Verbose("Item type registered: {}", itemId);
