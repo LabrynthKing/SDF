@@ -1,3 +1,7 @@
 
-[construct_data]
+[[builder_action]]
+id = "CustomBuilderAction"
 recipe = "CustomBuilderRecipe"
+
+secondary_description = "This is a secondary description"
+power_drain = "3"

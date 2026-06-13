@@ -37,10 +37,10 @@ UUWEScanData *Finders::searchScanData(const std::string &scanId) {
     return reinterpret_cast<UUWEScanData*>(item);
 }
 
-USN2BuilderActionData *Finders::searchBuilderAction(const std::string &dataId) {
+USN2BuilderConstructActionData *Finders::searchBuilderAction(const std::string &dataId) {
     const std::string trueExpr = "DA_" + dataId;
     const auto item = RC::Unreal::UObjectGlobals::FindObject(L"SN2BuilderConstructActionData", UtfN::StringToWString(trueExpr).c_str());
-    return reinterpret_cast<USN2BuilderActionData*>(item);
+    return reinterpret_cast<USN2BuilderConstructActionData*>(item);
 }
 
 UUWECrafterComponent *Finders::searchComponent(const std::string &componentPath) {
