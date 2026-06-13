@@ -1,6 +1,8 @@
 
 #include "Mod.hpp"
 
+#include "parsing/ItemTypeParser.hpp"
+
 #include "SDF/Version.hpp"
 
 using namespace RC;
@@ -11,15 +13,8 @@ void SN2CustomCraft::startup() {
 
     Hooks::RegisterHooks();
 
-#ifdef DEVELOPMENT
-    ItemTypeFactory type("CustomItem", "Custom Item Type", "This is a custom item type because why tf not");
-    type.setIconFromItem("CopperIngot");
-    SDK::UUWEPrimaryDataAssetBase* item = type.registerItemType();
-    if (!item)
-        Log::Error("What in the skibidi");
-#endif
-
     FileTraversal::ScanFiles();
+    ItemTypeParser::ParseItemTypes();
     CategoryParser::ParseCategories();
     RecipeParser::ParseRecipes();
 

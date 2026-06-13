@@ -8,13 +8,18 @@
 
 class ItemTypeFactory {
     std::string itemId, itemName, itemDescription;
-
     SDK::TSoftObjectPtr<SDK::UTexture2D> itemTexture;
+
+    bool modifyMode = false;
+    bool itemTextureModified;
 
     friend class Hooks;
 
 public:
-    explicit ItemTypeFactory(std::string itemId, std::string itemName, std::string itemDescription);
+    explicit ItemTypeFactory(std::string itemId, bool modifyMode);
+
+    void setName(const std::string &itemName);
+    void setDescription(const std::string &itemDescription);
 
     bool setIconFromItem(const std::string &itemId);
     bool setIconFromItem(const SDK::UUWEItemType *item);

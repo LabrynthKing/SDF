@@ -15,9 +15,11 @@ struct ScannedFile {
 class FileTraversal {
     static std::vector<ScannedFile> categoryTables;
     static std::vector<ScannedFile> recipeTables;
+    static std::vector<ScannedFile> itemTypeTables;
 
     friend class CategoryParser;
     friend class RecipeParser;
+    friend class ItemTypeParser;
     friend class SN2CustomCraft;
 
     static void ScanFiles();

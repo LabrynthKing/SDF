@@ -15,14 +15,10 @@ using namespace SDK;
 using namespace RC;
 using namespace Unreal;
 
-using EF = SDK::EObjectFlags;
-
 CategoryFactory::CategoryFactory(std::string categoryId, const bool modifyMode)
     : categoryId(std::move(categoryId)), categoryName(std::move("Empty")), categoryDescription(std::move("Empty")), crafterType(ECrafterType::Undefined), modifyMode(modifyMode) {
-    if (!modifyMode) {
-        const auto defaultTex = reinterpret_cast<UTexture2D*>(UObjectGlobals::FindObject(L"Texture2D", L"T_DefaultImage"));
-        setIcon(defaultTex);
-    }
+    if (!modifyMode)
+        setIcon(Finders::findCicadaTexture());
 }
 
 void CategoryFactory::setName(const std::string &categoryName) {

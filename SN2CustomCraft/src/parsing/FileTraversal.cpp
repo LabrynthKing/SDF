@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 
 std::vector<ScannedFile> FileTraversal::categoryTables;
 std::vector<ScannedFile> FileTraversal::recipeTables;
+std::vector<ScannedFile> FileTraversal::itemTypeTables;
 
 static std::string trim(const std::string &text)
 {
@@ -68,6 +69,8 @@ void FileTraversal::ScanFiles() {
                     categoryTables.push_back(scan);
                 if (toml.contains("recipe") || toml.contains("recipe_modify") || toml.contains("recipe_delete"))
                     recipeTables.push_back(scan);
+                if (toml.contains("item_type") || toml.contains("item_type_modify"))
+                    itemTypeTables.push_back(scan);
             } catch (const toml::parse_error& e) {
                 Log::Warning("Failed to parse file {}: {}", file.path().string(), e.what());
             }

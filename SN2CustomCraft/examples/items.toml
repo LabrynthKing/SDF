@@ -1,0 +1,6 @@
+
+[[item_type]]
+id = "TestItem"
+name = "Dynamic Item Type"
+description = "This item type is used for testing, if the dynamic item type files work"
+icon = "FILE MOD Icons/SDF.png"

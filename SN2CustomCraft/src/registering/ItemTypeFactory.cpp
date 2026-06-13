@@ -15,11 +15,17 @@ using namespace SDK;
 using namespace RC;
 using namespace Unreal;
 
-ItemTypeFactory::ItemTypeFactory(std::string itemId, std::string itemName, std::string itemDescription)
-    : itemId(std::move(itemId)), itemName(std::move(itemName)), itemDescription(std::move(itemDescription)) {
+ItemTypeFactory::ItemTypeFactory(std::string itemId, const bool modifyMode) : itemId(std::move(itemId)) {
+    if (!modifyMode)
+        setIcon(Finders::findCicadaTexture());
+}
 
-    const auto defaultTex = reinterpret_cast<UTexture2D*>(UObjectGlobals::FindObject(L"Texture2D", L"T_DefaultImage"));
-    setIcon(defaultTex);
+void ItemTypeFactory::setName(const std::string &itemName) {
+    this->itemName = itemName;
+}
+
+void ItemTypeFactory::setDescription(const std::string &itemDescription) {
+    this->itemDescription = itemDescription;
 }
 
 bool ItemTypeFactory::setIconFromItem(const std::string &itemId) {
@@ -36,11 +42,13 @@ bool ItemTypeFactory::setIconFromItem(const UUWEItemType *item) {
 bool ItemTypeFactory::setIcon(UTexture2D *icon) {
     if (icon == nullptr)
         return false;
+    itemTextureModified = true;
     itemTexture = static_cast<TSoftObjectPtr<UTexture2D>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(icon));
     return true;
 }
 
 void ItemTypeFactory::setIcon(const TSoftObjectPtr<UTexture2D> &icon) {
+    itemTextureModified = true;
     itemTexture = icon;
 }
 
@@ -52,9 +60,6 @@ UUWEItemType* ItemTypeFactory::registerItemType() const {
     const auto itemType = RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}_ItemType", itemId));
     if (itemType == nullptr)
         return nullptr;
-
-    //itemType->Name = UKismetStringLibrary::Conv_StringToName(UtfN::StringToWString(std::format("DA_{}_ItemType", itemId)).c_str());
-    //itemType->Flags = EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted;
 
     itemType->Name_0 = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(itemName).c_str());
     itemType->ItemDescription = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(itemDescription).c_str());

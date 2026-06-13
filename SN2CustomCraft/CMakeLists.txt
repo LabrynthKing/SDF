@@ -7,15 +7,19 @@ project(${TARGET})
 
 add_library(${TARGET} SHARED
         src/Mod.cpp
+
         src/registering/Hooks.cpp
         src/registering/RecipeFactory.cpp
         src/registering/ItemTypeFactory.cpp
         src/registering/BuilderActionFactory.cpp
         src/registering/CategoryFactory.cpp
+
         src/parsing/IconParser.cpp
         src/parsing/FileTraversal.cpp
         src/parsing/CategoryParser.cpp
         src/parsing/RecipeParser.cpp
+        src/parsing/ItemTypeParser.cpp
+
         src/util/RegistryHelper.cpp
         #src/util/IconBuilder.cpp
         src/util/Finders.cpp
