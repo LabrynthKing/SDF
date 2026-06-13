@@ -3,7 +3,6 @@
 
 #include "SDK/Engine_classes.hpp"
 #include "SDK/UWECrafting_classes.hpp"
-#include "SDK/UWEInventory_classes.hpp"
 
 struct StepData {
     int x = 0, y = 0, width = 256, height = 256;

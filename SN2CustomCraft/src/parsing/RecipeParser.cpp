@@ -11,7 +11,7 @@
 
 using namespace SDK;
 
-std::map<std::string, UUWECraftingRecipe*> RecipeParser::recipies{};
+std::map<std::string, UUWECraftingRecipe*> RecipeParser::recipes{};
 
 void RecipeParser::parseFile(const std::string &mod, const std::string &file, const toml::table &table, const bool modifyMode) {
     if (!table.contains("id") || !table["id"].is_string()) {
@@ -173,7 +173,7 @@ void RecipeParser::parseFile(const std::string &mod, const std::string &file, co
     if (const auto result = factory.registerRecipe(); result == nullptr)
         Log::Warning("Recipe {} failed to {} for an unknown reason", modifyMode ? "modify" : "register", recipeId);
     else
-        recipies.insert(std::make_pair(recipeId, result));
+        recipes.insert(std::make_pair(recipeId, result));
 }
 
 void RecipeParser::ParseRecipes() {

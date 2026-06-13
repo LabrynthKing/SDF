@@ -19,7 +19,7 @@
 class SN2CustomCraft : public CppUserModBase {
     bool scanning = true;
 
-    void startup();
+    static void startup();
 
 public:
     SN2CustomCraft();

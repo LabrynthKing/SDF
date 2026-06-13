@@ -229,7 +229,7 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
         recipe->DefaultRecipeState = ERecipeState::Locked;
     }
 
-    RegistryHelper::AddToRegistry(recipe, "CraftingRecipe");
+    RegistryHelper::AddToRegistry(recipe, "UWECraftingRecipe");
     registeredRecipes.push_back(recipe);
     if (availableInLifePodModify) {
         const auto staticBrokenFabricator = UObjectGlobals::StaticFindObject(nullptr, nullptr, L"/Game/Blueprints/Crafting/BP_Fabricator_Lifepod.Default__BP_Fabricator_Lifepod_C:Crafter");

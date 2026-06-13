@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include "SDK/UWEAssetRegistry_classes.hpp"
 
 class RegistryHelper {

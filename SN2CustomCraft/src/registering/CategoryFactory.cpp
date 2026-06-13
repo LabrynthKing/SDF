@@ -136,7 +136,7 @@ UUWECraftingRecipeCategory *CategoryFactory::registerCategory() const {
     if (categoryParent != nullptr)
         recipeCategory->ParentCategory = static_cast<TSoftObjectPtr<UUWECraftingRecipeCategory>>(UKismetSystemLibrary::Conv_ObjectToSoftObjectReference(categoryParent));
 
-    RegistryHelper::AddToRegistry(recipeCategory, "CraftingRecipeCategory");
+    RegistryHelper::AddToRegistry(recipeCategory, "UWECraftingRecipeCategory");
 
     Log::Verbose("Recipe category {}: {}", modifyMode ? "modified" : "registered", categoryId);
     return recipeCategory;

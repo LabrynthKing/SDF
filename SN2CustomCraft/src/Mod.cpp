@@ -37,13 +37,6 @@ void SN2CustomCraft::startup() {
     //recipe.setIcon(icon.build());
     //const auto _ = recipe.registerRecipe();
 
-
-    //const struct FDataRegistryType& RegistryType, TArray<struct FDataRegistryId>* OutIdList
-
-
-
-
-
     BuilderActionFactory factory("CustomBuilderRecipeRecipe");
     factory.addPowerDrainText("-1 Aura");
     if (!factory.registerBuilderAction())

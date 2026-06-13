@@ -15,8 +15,6 @@ using namespace SDK;
 using namespace RC;
 using namespace Unreal;
 
-using EF = SDK::EObjectFlags;
-
 ItemTypeFactory::ItemTypeFactory(std::string itemId, std::string itemName, std::string itemDescription)
     : itemId(std::move(itemId)), itemName(std::move(itemName)), itemDescription(std::move(itemDescription)) {
 
@@ -71,7 +69,7 @@ UUWEItemType* ItemTypeFactory::registerItemType() const {
     itemType->GameplayTags = base->GameplayTags;
     itemType->TunableData = base->TunableData;
 
-    RegistryHelper::AddToRegistry(itemType, "ItemType");
+    RegistryHelper::AddToRegistry(itemType, "UWEItemType");
 
     Log::Verbose("Item type registered: {}", itemId);
     return itemType;

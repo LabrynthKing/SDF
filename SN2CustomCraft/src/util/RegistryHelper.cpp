@@ -29,8 +29,6 @@ T *RegistryHelper::StaticConstructTemplate(T *base, const std::string name) {
 
     params.Name = Unreal::FName(UtfN::StringToWString(name).c_str());
     params.SetFlags = static_cast<Unreal::EObjectFlags>(EF::MarkAsRootSet | EF::Public | EF::Standalone | EF::Transactional | EF::WasLoaded | EF::LoadCompleted);
-    params.Template = reinterpret_cast<Unreal::UObject*>(base);
-
     return reinterpret_cast<T*>(UObjectGlobals::StaticConstructObject(params));
 }
 
@@ -58,13 +56,12 @@ void RegistryHelper::AddToRegistry(UUWEPrimaryDataAssetBase *asset, const std::s
     InitCache();
 
     for (auto& pair : assetRegistrySubsystem->CachedDataAssets) {
-        if (!pair.First->GetFullName().contains(type))
+        if (pair.First->GetName() != type)
             continue;
 
         auto* entries = reinterpret_cast<Unreal::TArray<UUWEPrimaryDataAssetBase*>*>(&pair.Second.Assets);
         entries->Add(asset);
-        Log::Warning("Test {}", pair.First->GetName());
         return;
     }
-    Log::Warning("Failed to register data asset to registry");
+    Log::Warning("Failed to register data asset to registry: {}", type);
 }
