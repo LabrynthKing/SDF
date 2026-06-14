@@ -14,55 +14,78 @@ using namespace SDK;
 using namespace RC;
 using namespace Unreal;
 
-using EF = SDK::EObjectFlags;
-
 std::vector<USN2BuilderActionData*> BuilderActionFactory::registeredActions;
 
-BuilderActionFactory::BuilderActionFactory(std::string recipeId)
-    : recipeId(std::move(recipeId)) {
+BuilderActionFactory::BuilderActionFactory(std::string id, const bool modifyMode)
+    : id(std::move(id)), recipe(nullptr), modifyMode(modifyMode) {
 }
 
-void BuilderActionFactory::addPowerDrainText(std::string text) {
+void BuilderActionFactory::setRemovePowerText(const bool removePowerText) {
+    this->removePowerText = removePowerText;
+}
+
+void BuilderActionFactory::setSecondaryDescription(const std::string &secondaryDescription) {
+    this->secondaryDescription = secondaryDescription;
+    modifySecondaryDescription = true;
+}
+
+void BuilderActionFactory::addPowerDrainText(const std::string& text) {
     powerDrainText = text;
 }
 
-void BuilderActionFactory::addPowerGenerationText(std::string text) {
+void BuilderActionFactory::addPowerGenerationText(const std::string& text) {
     powerGenerationText = text;
 }
 
+bool BuilderActionFactory::setRecipe(const std::string &recipe) {
+    return setRecipe(Finders::searchRecipe(recipe));
+}
+
+bool BuilderActionFactory::setRecipe(UUWECraftingRecipe *recipe) {
+    if (recipe == nullptr)
+        return false;
+    this->recipe = recipe;
+    recipeModified = true;
+    return true;
+}
+
 USN2BuilderConstructActionData* BuilderActionFactory::registerBuilderAction() const {
-    const auto base = static_cast<USN2BuilderConstructActionData*>(Finders::searchBuilderAction("Table_DiningConstructData"));
+    const auto base = Finders::searchBuilderAction("Table_DiningConstructData");
     if (base == nullptr)
         return nullptr;
 
-    const auto recipe = Finders::searchRecipe(recipeId);
-    if (recipe == nullptr) {
-        Log::Warning("Couldn't find reference recipe {}", recipeId);
+    const auto action = modifyMode ? Finders::searchBuilderAction(id) : RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}_ConstructData", id));
+    if (action == nullptr)
         return nullptr;
+
+    if (recipe != nullptr) {
+        action->Name_0 = recipe->Name_0;
+        action->Description = recipe->Description;
+        action->Thumbnail = recipe->Thumbnail;
+
+        action->RecipeCategory = recipe->Category;
+        action->Recipe = recipe;
+
+        action->DefaultUnlockState = recipe->DefaultRecipeState == ERecipeState::Unlocked ? EUnlockState::Unlocked : EUnlockState::Locked;
+        action->UpdatedUnlockingRequirements = recipe->UpdatedUnlockingRequirements;
     }
 
-    const auto action = RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}_ConstructData", recipeId));
-    if (recipe == nullptr)
-        return nullptr;
+    if (modifySecondaryDescription)
+        action->SecondaryDescription = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(secondaryDescription).c_str());
+    else if (!modifyMode)
+        action->SecondaryDescription = UKismetTextLibrary::Conv_StringToText(L"Empty");
 
-    action->Name_0 = recipe->Name_0;
-    action->Description = recipe->Description;
-    action->SecondaryDescription = UKismetTextLibrary::Conv_StringToText(L"WIP"); // TODO: Either automatic or provide func
-    action->Thumbnail = recipe->Thumbnail;
-
-    if (powerDrainText.has_value())
+    if (removePowerText) {
+        action->PowerDrainText = UKismetTextLibrary::Conv_StringToText(L"");
+        action->PowerGenerationText = UKismetTextLibrary::Conv_StringToText(L"");
+    }
+    else if (powerDrainText.has_value())
         action->PowerDrainText = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(powerDrainText.value()).c_str());
-
-    if (powerGenerationText.has_value())
+    else if (powerGenerationText.has_value())
         action->PowerGenerationText = UKismetTextLibrary::Conv_StringToText(UtfN::StringToWString(powerGenerationText.value()).c_str());
 
     action->Category = base->Category;
     action->EventTag = base->EventTag;
-
-    action->DefaultUnlockState = recipe->DefaultRecipeState == ERecipeState::Unlocked ? EUnlockState::Unlocked : EUnlockState::Locked;
-    action->UpdatedUnlockingRequirements = recipe->UpdatedUnlockingRequirements;
-    action->RecipeCategory = recipe->Category;
-    action->Recipe = recipe;
 
     // TODO: All after this should be configurable
 
@@ -73,6 +96,6 @@ USN2BuilderConstructActionData* BuilderActionFactory::registerBuilderAction() co
     registeredActions.push_back(action);
     RegistryHelper::AddToRegistry(action, "SN2BuilderConstructActionData");
 
-    Log::Verbose("Builder action registered: {}", recipeId);
+    Log::Verbose("Builder action registered: {}", id);
     return action;
 }

@@ -16,10 +16,12 @@ class FileTraversal {
     static std::vector<ScannedFile> categoryTables;
     static std::vector<ScannedFile> recipeTables;
     static std::vector<ScannedFile> itemTypeTables;
+    static std::vector<ScannedFile> builderActionTables;
 
     friend class CategoryParser;
     friend class RecipeParser;
     friend class ItemTypeParser;
+    friend class BuilderActionParser;
     friend class SN2CustomCraft;
 
     static void ScanFiles();

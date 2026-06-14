@@ -171,7 +171,11 @@ UUWECraftingRecipe* RecipeFactory::registerRecipe() const {
     if (base == nullptr)
         return nullptr;
 
-    const auto recipe = modifyMode ? Finders::searchRecipe(recipeId) : RegistryHelper::StaticConstructTemplate(base, std::format("DA_{}Recipe", recipeId));
+    auto createText = std::format("DA_{}", recipeId);
+    if (!createText.contains("Recipe"))
+        createText.append("Recipe");
+
+    const auto recipe = modifyMode ? Finders::searchRecipe(recipeId) : RegistryHelper::StaticConstructTemplate(base, createText);
     if (recipe == nullptr)
         return nullptr;
 

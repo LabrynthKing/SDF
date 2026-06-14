@@ -1,6 +1,7 @@
 
 #include "Mod.hpp"
 
+#include "parsing/BuilderActionParser.hpp"
 #include "parsing/ItemTypeParser.hpp"
 
 #include "SDF/Version.hpp"
@@ -17,6 +18,7 @@ void SN2CustomCraft::startup() {
     ItemTypeParser::ParseItemTypes();
     CategoryParser::ParseCategories();
     RecipeParser::ParseRecipes();
+    BuilderActionParser::ParseBuilderActions();
 
 #ifdef DEVELOPMENT
     //RecipeFactory recipe("TestRec", "Test Recipe", "This is a recipe for testing dynamic icons");
@@ -31,32 +33,6 @@ void SN2CustomCraft::startup() {
     //});
     //recipe.setIcon(icon.build());
     //const auto _ = recipe.registerRecipe();
-
-    BuilderActionFactory factory("CustomBuilderRecipeRecipe");
-    factory.addPowerDrainText("-1 Aura");
-    if (!factory.registerBuilderAction())
-        Log::Error("Errm what the sigma");
-
-    Log::Warning("Finding Transient UWEAssetRegistrySubsystem");
-
-    std::vector<Unreal::UObject*> list{};
-    RC::UObjectGlobals::FindAllOf(L"UWEAssetRegistrySubsystem", list);
-
-    // Research
-    SDK::USN2AssetRegistry::RebuildAssetRegistryCachedData();
-
-    std::vector<Unreal::UObject*> list2{};
-    UObjectGlobals::FindAllOf(L"SN2FabricatorViewModel", list2);
-
-    for (const auto& obj : list2) {
-        if (!obj->GetFullName().contains(L"/Engine/Transient."))
-            continue;
-
-        const auto test = reinterpret_cast<SDK::USN2FabricatorViewModel*>(obj);
-        for (const auto entry : test->CategoryViewModelsByCategory) {
-            Log::Warning("Test {}", entry.Second->GetCrafterText().ToString());
-        }
-    }
 #endif
 }
 
@@ -71,10 +47,6 @@ SN2CustomCraft::~SN2CustomCraft() {
     if (scanning)
         return;
     Hooks::UnregisterHooks();
-
-    // TODO: RecipeFactory::unregisterAllRecipes();
-    // TODO: CategoryFactory::unregisterAllCategories();
-    FileTraversal::DeleteCache();
 }
 
 void SN2CustomCraft::on_update() {

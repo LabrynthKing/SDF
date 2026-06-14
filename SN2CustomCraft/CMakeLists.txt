@@ -21,6 +21,7 @@ add_library(${TARGET} SHARED
         src/parsing/CategoryParser.cpp
         src/parsing/RecipeParser.cpp
         src/parsing/ItemTypeParser.cpp
+        src/parsing/BuilderActionParser.cpp
 
         src/util/RegistryHelper.cpp
         #src/util/IconBuilder.cpp
