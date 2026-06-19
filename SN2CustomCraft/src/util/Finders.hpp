@@ -11,7 +11,7 @@
 
 class Finders {
 public:
-    template <typename T, typename = std::enable_if_t<std::is_base_of_v<SDK::UUWEStoryGoalRule, T>>>
+    template <typename T, typename = std::enable_if_t<std::is_base_of_v<SDK::UObject, T>>>
     static T* searchFirstOf(const std::string &typeId) {
         const auto item = RC::Unreal::UObjectGlobals::FindFirstOf(UtfN::StringToWString(typeId).c_str());
         return reinterpret_cast<T*>(item);
