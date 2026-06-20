@@ -4,6 +4,8 @@
 
 #include "StoryGoalRuleParser.hpp"
 
+#include "util/Finders.hpp"
+
 using namespace SDK;
 
 std::unique_ptr<StoryGoalRule> StoryGoalRuleParser::parseSegment(const std::string& id, std::string& content) {

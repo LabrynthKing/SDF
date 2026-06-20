@@ -6,6 +6,7 @@
 
 #include "util/Finders.hpp"
 #include "util/RegistryHelper.hpp"
+#include "Containers/Array.hpp"
 
 using namespace SDK;
 
