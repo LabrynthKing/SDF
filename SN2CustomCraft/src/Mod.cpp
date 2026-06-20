@@ -15,6 +15,7 @@
 #include "util/Log.hpp"
 
 #include "Mod/CppUserModBase.hpp"
+#include "parsing/DatabankEntryParser.hpp"
 
 using namespace RC;
 using namespace Unreal;
@@ -49,6 +50,7 @@ void SN2CustomCraft::startup() {
     CategoryParser::ParseCategories();
     RecipeParser::ParseRecipes();
     BuilderActionParser::ParseBuilderActions();
+    DatabankEntryParser::ParseDatabankEntries();
 
 #ifdef DEVELOPMENT
     //RecipeFactory recipe("TestRec", "Test Recipe", "This is a recipe for testing dynamic icons");
@@ -63,18 +65,6 @@ void SN2CustomCraft::startup() {
     //});
     //recipe.setIcon(icon.build());
     //const auto _ = recipe.registerRecipe();
-
-    auto unlockedBy = StoryGoalRuleFactory::registerStoryGoalRule(StoryGoalParser::ParseRule("TestStoryGoalRule", "And[Count[1; 'Rebreather_Crafted']]", false));
-
-    DatabankEntryFactory databank("TestDatabankEntry", false);
-    databank.setTitle("Test Databank Entry");
-    databank.setText("This is a databank entry to test the DatabankEntryFactory and StoryGoalFactory");
-    databank.setIcon(Finders::findCicadaTexture());
-    databank.addCategory("Custom Category");
-    databank.addCategory("Custom Category 2");
-    databank.setUnlockCondition(unlockedBy);
-    if (!databank.registerDatabankEntry())
-        Log::Error("Failed to register databank entry");
 #endif
 }
 

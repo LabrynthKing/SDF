@@ -25,8 +25,10 @@ std::unique_ptr<StoryGoalRule> StoryGoalParser::parseRuleSegment(const std::stri
         auto entry = std::make_unique<StoryGoalRequiredRule>();
         entry->goalId = id;
         entry->goal = Finders::searchStoryGoal(searchString);
-        Log::Warning("Remaining content: {}", content);
-        Log::Warning("Found story goal: {} --> {:p}", searchString, static_cast<void*>(entry->goal));
+        if (debug) {
+            Log::Warning("Remaining content: {}", content);
+            Log::Warning("Found story goal: {} --> {:p}", searchString, static_cast<void*>(entry->goal));
+        }
         return entry->goal == nullptr ? nullptr : std::move(entry);
     }
     if (content.starts_with("Negate(")) {
@@ -37,7 +39,7 @@ std::unique_ptr<StoryGoalRule> StoryGoalParser::parseRuleSegment(const std::stri
         entry->goalId = id;
         entry->rule = std::move(rule);
         content = content.substr(1);
-        Log::Warning("Remaining content: {}", content);
+        if (debug) Log::Warning("Remaining content: {}", content);
         return entry;
     }
     if (content.starts_with("And[") || content.starts_with("Or[") || content.starts_with("Count[")) {
@@ -54,7 +56,7 @@ std::unique_ptr<StoryGoalRule> StoryGoalParser::parseRuleSegment(const std::stri
             try {
                 reinterpret_cast<StoryGoalRuleCount*>(entry.get())->count = std::stoi(content.substr(0, content.find(';')));
             } catch (std::exception& _) {
-                Log::Warning("Failed to parse integer! Remaining content: {}", content);
+                if (debug) Log::Warning("Failed to parse integer! Remaining content: {}", content);
                 return nullptr;
             }
             content = content.substr(content.find(';') + 1);
@@ -64,7 +66,7 @@ std::unique_ptr<StoryGoalRule> StoryGoalParser::parseRuleSegment(const std::stri
         while (!content.empty()) {
             if (content.starts_with("]")) {
                 content = content.substr(1);
-                Log::Warning("Remaining content: {}", content);
+                if (debug) Log::Warning("Remaining content: {}", content);
                 return entry;
             }
             if (content.starts_with(","))
@@ -74,7 +76,7 @@ std::unique_ptr<StoryGoalRule> StoryGoalParser::parseRuleSegment(const std::stri
                 return nullptr;
             entry->rules.push_back(std::move(rule));
         }
-        Log::Warning("Invalid list! Remaining content: {}", content);
+        if (debug) Log::Warning("Invalid list! Remaining content: {}", content);
         return nullptr;
     }
     return nullptr;

@@ -23,6 +23,7 @@ add_library(${TARGET} SHARED
         src/parsing/ItemTypeParser.cpp
         src/parsing/BuilderActionParser.cpp
         src/parsing/StoryGoalParser.cpp
+        src/parsing/DatabankEntryParser.cpp
 
         src/util/RegistryHelper.cpp
         #src/util/IconBuilder.cpp
